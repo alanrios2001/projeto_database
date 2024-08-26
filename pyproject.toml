@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "sistema-bd"
+version = "0.1.0"
+description = ""
+authors = ["alanr <alanrios2001@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+sqlalchemy = "^2.0.29"
+mysqlclient = "^2.2.4"
+duckdb = "^1.0.0"
+duckdb-engine = "^0.13.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
