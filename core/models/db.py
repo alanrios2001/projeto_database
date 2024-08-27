@@ -23,13 +23,65 @@ engine = create_engine('duckdb:///meu_banco.duckdb')
 LocalSession = sessionmaker(engine, autocommit=False)
 
 
-class SexoEnum(enum.Enum):
-    M = "M"
-    F = "F"
+class GeneroEnum(enum.Enum):
+    MASCULINO = "MASCULINO"
+    FEMININO = "FEMININO"
+
+
+class StatusEnum(enum.Enum):
+    DISPONIVEL = "DISPONIVEL"
+    EM_USO = "EM_USO"
+    EM_MANUTENCAO = "EM_MANUTENCAO"
+    QUEBRADO = "QUEBRADO"
+
+
+class TipoTransacaoEnum(enum.Enum):
+    ENTRADA = "ENTRADA"
+    SAIDA = "SAIDA"
+
+
+class TipoConsultaEnum(enum.Enum):
+    ROTINA = "ROTINA"
+    URGENCIA = "URGENCIA"
+    RETORNO = "RETORNO"
+
+
+class EspecialidadeEnum(enum.Enum):
+    CARDIOLOGISTA = "CARDIOLOGISTA"
+    CLINICO_GERAL = "CLINICO_GERAL"
+    DERMATOLOGISTA = "DERMATOLOGISTA"
+    ENDOCRINOLOGISTA = "ENDOCRINOLOGISTA"
+    GINECOLOGISTA = "GINECOLOGISTA"
+    NEUROLOGISTA = "NEUROLOGISTA"
+    OFTALMOLOGISTA = "OFTALMOLOGISTA"
+    ORTOPEDISTA = "ORTOPEDISTA"
+    OTORRINOLARINGOLOGISTA = "OTORRINOLARINGOLOGISTA"
+    PEDIATRA = "PEDIATRA"
+    PSIQUIATRA = "PSIQUIATRA"
+    UROLOGISTA = "UROLOGISTA"
+    NUTRICIONISTA = "NUTRICIONISTA"
+    FISIOTERAPEUTA = "FISIOTERAPEUTA"
+    PSICOLOGO = "PSICOLOGO"
+    FONOAUDIOLOGO = "FONOAUDIOLOGO"
+    FARMACEUTICO = "FARMACEUTICO"
 
 
 class BaseModel(DeclarativeBase):
     pass
+
+
+class TransacoesFinanceiras(BaseModel):
+    __tablename__ = "transacoes_financeiras"
+
+    id = Column(Integer, Sequence('transacoes_financeiras_id_seq'), primary_key=True)
+    paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
+    tipo_transacao: Mapped[TipoTransacaoEnum] = mapped_column(nullable=False)
+    valor = mapped_column(TEXT, nullable=False)
+    data = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+
+    paciente: Mapped['Pacientes'] = relationship(back_populates="transacoes_financeiras")
 
 
 class Pacientes(BaseModel):
@@ -38,66 +90,109 @@ class Pacientes(BaseModel):
     id = Column(Integer, Sequence('paciente_id_seq'), primary_key=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     data_nascimento = mapped_column(TIMESTAMP, nullable=False)
-    sexo: Mapped[SexoEnum] = mapped_column(nullable=False)
+    genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
     endereco = mapped_column(TEXT, nullable=True)
     telefone = mapped_column(TEXT, nullable=True)
     email = mapped_column(TEXT, nullable=True)
-    cpf = mapped_column(TEXT, nullable=True)
-    rg = mapped_column(TEXT, nullable=True)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    prontuarios: Mapped['Prontuarios'] = relationship(back_populates="pacientes")
-    atendimentos: Mapped['Atendimentos'] = relationship(back_populates="pacientes")
+    transacoes_financeiras: Mapped['TransacoesFinanceiras'] = relationship(back_populates="paciente")
+    consultas: Mapped['Consultas'] = relationship(back_populates="pacientes")
 
 
 class Medicos(BaseModel):
-    __tablename__ = "medicos"
+    __tablename__ = "profissionais_saude"
 
     id = Column(Integer, Sequence('medicos_id_seq'), primary_key=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     crm = mapped_column(TEXT, nullable=False)
-    especialidade = mapped_column(TEXT, nullable=True)
-    telefone = mapped_column(TEXT, nullable=True)
-    email = mapped_column(TEXT, nullable=True)
+    especialidade: Mapped[EspecialidadeEnum] = mapped_column(nullable=False)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    atendimentos: Mapped['Atendimentos'] = relationship(back_populates="medicos")
-    prontuarios: Mapped['Prontuarios'] = relationship(back_populates="medicos")
+    consultas: Mapped['Consultas'] = relationship(back_populates="medicos")
 
 
-class Atendimentos(BaseModel):
-    __tablename__ = "atendimentos"
+class Consultas(BaseModel):
+    __tablename__ = "consultas"
 
     id = Column(Integer, Sequence('atendimentos_id_seq'), primary_key=True)
-    id_paciente: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
-    id_medico: Mapped[int] = mapped_column(ForeignKey("medicos.id"))
-    data_atendimento = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    motivo_atendimento = mapped_column(TEXT, nullable=True)
-    diagnostico = mapped_column(TEXT, nullable=True)
-    tratamento = mapped_column(TEXT, nullable=True)
-    medicamentos = mapped_column(TEXT, nullable=True)
-    exames = mapped_column(TEXT, nullable=True)
-    observacoes = mapped_column(TEXT, nullable=True)
+    paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"), primary_key=True)
+    profissional_id: Mapped[int] = mapped_column(ForeignKey("profissionais_saude.id"))
+    data = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    tipo_consulta = mapped_column(TEXT, nullable=True)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    medicos: Mapped['Medicos'] = relationship(back_populates="atendimentos")
-    pacientes: Mapped['Pacientes'] = relationship(back_populates="atendimentos")
+    medico: Mapped['Medicos'] = relationship(back_populates="consultas")
+    paciente: Mapped['Pacientes'] = relationship(back_populates="consultas")
+    diagnosticos: Mapped['Diagnosticos'] = relationship(back_populates="consultas")
+    prescricoes: Mapped['Prescricoes'] = relationship(back_populates="consultas")
 
 
 class Prontuarios(BaseModel):
     __tablename__ = "prontuarios"
 
     id = Column(Integer, Sequence('prontuarios_id_seq'), primary_key=True)
-    id_paciente: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
-    id_medico: Mapped[int] = mapped_column(ForeignKey("medicos.id"))
-    data_entrada = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    data_saida = mapped_column(TIMESTAMP, default=None, server_default=None)
-    motivo_saida = mapped_column(TEXT, nullable=True)
-    diagnostico = mapped_column(TEXT, nullable=True)
-    tratamento = mapped_column(TEXT, nullable=True)
-    medicamentos = mapped_column(TEXT, nullable=True)
-    exames = mapped_column(TEXT, nullable=True)
-    observacoes = mapped_column(TEXT, nullable=True)
+    paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
+    observacoes = mapped_column(TEXT, nullable=True, default=None)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    pacientes: Mapped['Pacientes'] = relationship(back_populates="prontuarios")
-    medicos: Mapped['Medicos'] = relationship(back_populates="prontuarios")
+    paciente: Mapped['Pacientes'] = relationship(back_populates="prontuarios")
+
+
+class Diagnosticos(BaseModel):
+    __tablename__ = "diagnosticos"
+
+    id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True)
+    consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
+    conteudo = mapped_column(TEXT, nullable=True, default=None)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+
+    consulta: Mapped['Consultas'] = relationship(back_populates="diagnostico")
+
+
+class Prescricoes(BaseModel):
+    __tablename__ = "prescricoes"
+
+    id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True)
+    consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
+    conteudo = mapped_column(TEXT, nullable=True, default=None)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+
+    consulta: Mapped['Consultas'] = relationship(back_populates="prescricoes")
+
+
+class Medicamentos(BaseModel):
+    __tablename__ = "medicamentos"
+
+    id = Column(Integer, Sequence('medicamentos_id_seq'), primary_key=True)
+    nome = mapped_column(VARCHAR(100), nullable=False)
+    validade = mapped_column(TIMESTAMP, nullable=False)
+    quantidade = mapped_column(Integer, nullable=False)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+
+
+class RecursosHospitalares(BaseModel):
+    __tablename__ = "recursos_hospitalares"
+
+    id = Column(Integer, Sequence('recursos_hospitalares_id_seq'), primary_key=True)
+    nome = mapped_column(VARCHAR(100), nullable=False)
+    marca = mapped_column(VARCHAR(100), nullable=False)
+    status: Mapped[StatusEnum] = mapped_column(nullable=False)
+    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
 
 def create_database():
