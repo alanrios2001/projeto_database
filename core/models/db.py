@@ -18,7 +18,14 @@ HOST = "localhost"
 PORT = 3306
 DATABASE = "sistema_hospitalar"
 
-engine = create_engine('duckdb:///meu_banco.duckdb')
+#engine = create_engine('duckdb:///meu_banco.duckdb')
+
+engine = create_engine(
+    (
+        f"mysql+mysqldb://{USERNAME}:{PASSWORD}@"
+        f"{HOST}:{PORT}/{DATABASE}"
+    ),
+)
 
 LocalSession = sessionmaker(engine, autocommit=False)
 
