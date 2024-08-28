@@ -11,6 +11,7 @@ sqlalchemy = "^2.0.29"
 mysqlclient = "^2.2.4"
 duckdb = "^1.0.0"
 duckdb-engine = "^0.13.1"
+dynaconf = "^3.2.6"
 
 
 [build-system]

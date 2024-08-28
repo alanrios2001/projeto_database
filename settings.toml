@@ -1,0 +1,5 @@
+[database]
+DATABASE = "sistema_hospitalar"
+HOST = "localhost"
+PORT = 3306
+USERNAME = "root"

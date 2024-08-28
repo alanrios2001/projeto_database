@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence
+from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text
 from sqlalchemy.orm import (
     relationship,
     mapped_column,
@@ -12,19 +12,32 @@ from sqlalchemy.orm import (
 
 from sqlalchemy.dialects.mysql import TIMESTAMP, TEXT, VARCHAR
 
-USERNAME = "root"
-PASSWORD = "root"
-HOST = "localhost"
-PORT = 3306
-DATABASE = "sistema_hospitalar"
+from config import settings
 
-#engine = create_engine('duckdb:///meu_banco.duckdb')
+USERNAME = settings.database.USERNAME
+PASSWORD = settings.database.PASSWORD
+HOST = settings.database.HOST
+PORT = settings.database.PORT
+DATABASE = settings.database.DATABASE
+
+# engine = create_engine('duckdb:///meu_banco.duckdb')
+
+connection_string = f"mysql+mysqldb://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/"
+
+default_engine = create_engine(
+    connection_string
+)
+
+
+def create_database():
+    with default_engine.connect() as conn:
+        conn.execute(text("CREATE DATABASE IF NOT EXISTS sistema_hospitalar"))
+
+
+create_database()
 
 engine = create_engine(
-    (
-        f"mysql+mysqldb://{USERNAME}:{PASSWORD}@"
-        f"{HOST}:{PORT}/{DATABASE}"
-    ),
+    connection_string + DATABASE
 )
 
 LocalSession = sessionmaker(engine, autocommit=False)
