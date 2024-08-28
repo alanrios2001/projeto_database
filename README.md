@@ -11,6 +11,8 @@ cd path/to/project/dir
 poetry install
 ```
 
+Antes de executar o proximo comando, é necessario ajustar as configurações da conexão com o banco em settings.toml e .secrets.toml
+
 Criar database e tabelas:
 ```bash
 poetry run python models/db.py
