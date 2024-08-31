@@ -17,7 +17,7 @@ async def create_pacientes(session: AsyncSession, num: int = 100):
     for _ in range(num):
         paciente = Pacientes(
             nome=fake.name(),
-            data_nascimento=datetime.combine(fake.date_of_birth(minimum_age=18, maximum_age=90), datetime.min.time()),
+            data_nascimento=fake.date_of_birth(minimum_age=18, maximum_age=90).strftime('%Y-%m-%d %H:%M:%S'),
             genero=choice(list(GeneroEnum)),
             endereco=fake.address(),
             telefone=fake.phone_number(),
@@ -35,6 +35,7 @@ async def create_medicos(session: AsyncSession, num: int = 100):
     for _ in range(num):
         medico = Medicos(
             nome=fake.name(),
+            genero=choice(list(GeneroEnum)),
             crm=fake.bothify(text='CRM-####-UF'),
             especialidade=choice(list(EspecialidadeEnum)),
             created_at=datetime.now(),

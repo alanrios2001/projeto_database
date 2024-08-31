@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text
+from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text, DATETIME
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import (
     relationship,
@@ -13,7 +13,7 @@ from sqlalchemy.orm import (
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from sqlalchemy.dialects.mysql import TIMESTAMP, TEXT, VARCHAR
+from sqlalchemy.dialects.mysql import TEXT, VARCHAR
 
 from config import settings
 
@@ -106,9 +106,9 @@ class TransacoesFinanceiras(BaseModel):
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
     tipo_transacao: Mapped[TipoTransacaoEnum] = mapped_column(nullable=False)
     valor = mapped_column(TEXT, nullable=False)
-    data = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    data = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     paciente: Mapped['Pacientes'] = relationship(back_populates="transacoes_financeiras")
 
@@ -118,14 +118,14 @@ class Pacientes(BaseModel):
 
     id = Column(Integer, Sequence('paciente_id_seq'), primary_key=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
-    data_nascimento = mapped_column(TIMESTAMP, nullable=False)
+    data_nascimento = mapped_column(DATETIME, nullable=False)
     genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
     endereco = mapped_column(TEXT, nullable=True)
     telefone = mapped_column(TEXT, nullable=True)
     email = mapped_column(TEXT, nullable=True)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     transacoes_financeiras: Mapped['TransacoesFinanceiras'] = relationship(back_populates="paciente")
     consultas: Mapped['Consultas'] = relationship(back_populates="paciente")
@@ -137,11 +137,12 @@ class Medicos(BaseModel):
 
     id = Column(Integer, Sequence('medicos_id_seq'), primary_key=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
+    genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
     crm = mapped_column(TEXT, nullable=False)
     especialidade: Mapped[EspecialidadeEnum] = mapped_column(nullable=False)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     consultas: Mapped['Consultas'] = relationship(back_populates="medico")
 
@@ -152,10 +153,10 @@ class Consultas(BaseModel):
     id = Column(Integer, Sequence('atendimentos_id_seq'), primary_key=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"), primary_key=True)
     profissional_id: Mapped[int] = mapped_column(ForeignKey("profissionais_saude.id"))
-    data = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
+    data = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     tipo_consulta = mapped_column(TEXT, nullable=True)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     medico: Mapped['Medicos'] = relationship(back_populates="consultas")
     paciente: Mapped['Pacientes'] = relationship(back_populates="consultas")
@@ -169,9 +170,9 @@ class Prontuarios(BaseModel):
     id = Column(Integer, Sequence('prontuarios_id_seq'), primary_key=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
     observacoes = mapped_column(TEXT, nullable=True, default=None)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     paciente: Mapped['Pacientes'] = relationship(back_populates="prontuario")
 
@@ -182,9 +183,9 @@ class Diagnosticos(BaseModel):
     id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
     conteudo = mapped_column(TEXT, nullable=True, default=None)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     consulta: Mapped['Consultas'] = relationship(back_populates="diagnosticos")
 
@@ -195,8 +196,8 @@ class Prescricoes(BaseModel):
     id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
     conteudo = mapped_column(TEXT, nullable=True, default=None)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
     consulta: Mapped['Consultas'] = relationship(back_populates="prescricoes")
 
@@ -206,11 +207,11 @@ class Medicamentos(BaseModel):
 
     id = Column(Integer, Sequence('medicamentos_id_seq'), primary_key=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
-    validade = mapped_column(TIMESTAMP, nullable=False)
+    validade = mapped_column(DATETIME, nullable=False)
     quantidade = mapped_column(Integer, nullable=False)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
 
 class RecursosHospitalares(BaseModel):
@@ -220,9 +221,9 @@ class RecursosHospitalares(BaseModel):
     nome = mapped_column(VARCHAR(100), nullable=False)
     marca = mapped_column(VARCHAR(100), nullable=False)
     status: Mapped[StatusEnum] = mapped_column(nullable=False)
-    created_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
-    deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
+    created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
+    deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
 
 def create_database():
