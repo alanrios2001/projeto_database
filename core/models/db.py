@@ -2,6 +2,7 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import (
     relationship,
     mapped_column,
@@ -9,6 +10,8 @@ from sqlalchemy.orm import (
     sessionmaker,
     DeclarativeBase,
 )
+
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from sqlalchemy.dialects.mysql import TIMESTAMP, TEXT, VARCHAR
 
@@ -40,7 +43,13 @@ engine = create_engine(
     connection_string + DATABASE
 )
 
+async_engine = create_async_engine(
+    connection_string.replace('mysqldb', 'asyncmy') + DATABASE
+)
+
 LocalSession = sessionmaker(engine, autocommit=False)
+
+LocalAsyncSession = async_sessionmaker(async_engine, autocommit=False)
 
 
 class GeneroEnum(enum.Enum):
@@ -119,7 +128,8 @@ class Pacientes(BaseModel):
     deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
     transacoes_financeiras: Mapped['TransacoesFinanceiras'] = relationship(back_populates="paciente")
-    consultas: Mapped['Consultas'] = relationship(back_populates="pacientes")
+    consultas: Mapped['Consultas'] = relationship(back_populates="paciente")
+    prontuario: Mapped['Prontuarios'] = relationship(back_populates='paciente')
 
 
 class Medicos(BaseModel):
@@ -133,7 +143,7 @@ class Medicos(BaseModel):
     updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    consultas: Mapped['Consultas'] = relationship(back_populates="medicos")
+    consultas: Mapped['Consultas'] = relationship(back_populates="medico")
 
 
 class Consultas(BaseModel):
@@ -149,8 +159,8 @@ class Consultas(BaseModel):
 
     medico: Mapped['Medicos'] = relationship(back_populates="consultas")
     paciente: Mapped['Pacientes'] = relationship(back_populates="consultas")
-    diagnosticos: Mapped['Diagnosticos'] = relationship(back_populates="consultas")
-    prescricoes: Mapped['Prescricoes'] = relationship(back_populates="consultas")
+    diagnosticos: Mapped['Diagnosticos'] = relationship(back_populates="consulta")
+    prescricoes: Mapped['Prescricoes'] = relationship(back_populates="consulta")
 
 
 class Prontuarios(BaseModel):
@@ -163,7 +173,7 @@ class Prontuarios(BaseModel):
     updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    paciente: Mapped['Pacientes'] = relationship(back_populates="prontuarios")
+    paciente: Mapped['Pacientes'] = relationship(back_populates="prontuario")
 
 
 class Diagnosticos(BaseModel):
@@ -176,7 +186,7 @@ class Diagnosticos(BaseModel):
     updated_at = mapped_column(TIMESTAMP, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(TIMESTAMP, default=None, server_default=None)
 
-    consulta: Mapped['Consultas'] = relationship(back_populates="diagnostico")
+    consulta: Mapped['Consultas'] = relationship(back_populates="diagnosticos")
 
 
 class Prescricoes(BaseModel):
