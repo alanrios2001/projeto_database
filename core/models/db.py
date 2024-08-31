@@ -102,7 +102,7 @@ class BaseModel(DeclarativeBase):
 class TransacoesFinanceiras(BaseModel):
     __tablename__ = "transacoes_financeiras"
 
-    id = Column(Integer, Sequence('transacoes_financeiras_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('transacoes_financeiras_id_seq'), primary_key=True, autoincrement=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
     tipo_transacao: Mapped[TipoTransacaoEnum] = mapped_column(nullable=False)
     valor = mapped_column(TEXT, nullable=False)
@@ -116,7 +116,7 @@ class TransacoesFinanceiras(BaseModel):
 class Pacientes(BaseModel):
     __tablename__ = "pacientes"
 
-    id = Column(Integer, Sequence('paciente_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('paciente_id_seq'), primary_key=True, autoincrement=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     data_nascimento = mapped_column(DATETIME, nullable=False)
     genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
@@ -135,7 +135,7 @@ class Pacientes(BaseModel):
 class Medicos(BaseModel):
     __tablename__ = "profissionais_saude"
 
-    id = Column(Integer, Sequence('medicos_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('medicos_id_seq'), primary_key=True, autoincrement=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
     crm = mapped_column(TEXT, nullable=False)
@@ -150,7 +150,7 @@ class Medicos(BaseModel):
 class Consultas(BaseModel):
     __tablename__ = "consultas"
 
-    id = Column(Integer, Sequence('consultas_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('consultas_id_seq'), primary_key=True, autoincrement=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"), primary_key=True)
     profissional_id: Mapped[int] = mapped_column(ForeignKey("profissionais_saude.id"))
     data = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
@@ -167,7 +167,7 @@ class Consultas(BaseModel):
 class Prontuarios(BaseModel):
     __tablename__ = "prontuarios"
 
-    id = Column(Integer, Sequence('prontuarios_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('prontuarios_id_seq'), primary_key=True, autoincrement=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
     observacoes = mapped_column(TEXT, nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
@@ -180,7 +180,7 @@ class Prontuarios(BaseModel):
 class Diagnosticos(BaseModel):
     __tablename__ = "diagnosticos"
 
-    id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True, autoincrement=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
     conteudo = mapped_column(TEXT, nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
@@ -193,7 +193,7 @@ class Diagnosticos(BaseModel):
 class Prescricoes(BaseModel):
     __tablename__ = "prescricoes"
 
-    id = Column(Integer, Sequence('prescricoes_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('prescricoes_id_seq'), primary_key=True, autoincrement=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
     conteudo = mapped_column(TEXT, nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
@@ -205,7 +205,7 @@ class Prescricoes(BaseModel):
 class Medicamentos(BaseModel):
     __tablename__ = "medicamentos"
 
-    id = Column(Integer, Sequence('medicamentos_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('medicamentos_id_seq'), primary_key=True, autoincrement=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     validade = mapped_column(DATETIME, nullable=False)
     quantidade = mapped_column(Integer, nullable=False)
@@ -217,7 +217,7 @@ class Medicamentos(BaseModel):
 class RecursosHospitalares(BaseModel):
     __tablename__ = "recursos_hospitalares"
 
-    id = Column(Integer, Sequence('recursos_hospitalares_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('recursos_hospitalares_id_seq'), primary_key=True, autoincrement=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     marca = mapped_column(VARCHAR(100), nullable=False)
     status: Mapped[StatusEnum] = mapped_column(nullable=False)
