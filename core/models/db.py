@@ -207,6 +207,7 @@ class Medicamentos(BaseModel):
 
     id = Column(Integer, Sequence('medicamentos_id_seq'), primary_key=True, autoincrement=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
+    laboratorio = mapped_column(VARCHAR(100), nullable=False)
     validade = mapped_column(DATETIME, nullable=False)
     quantidade = mapped_column(Integer, nullable=False)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
