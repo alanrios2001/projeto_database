@@ -150,7 +150,7 @@ class Medicos(BaseModel):
 class Consultas(BaseModel):
     __tablename__ = "consultas"
 
-    id = Column(Integer, Sequence('atendimentos_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('consultas_id_seq'), primary_key=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"), primary_key=True)
     profissional_id: Mapped[int] = mapped_column(ForeignKey("profissionais_saude.id"))
     data = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
@@ -193,7 +193,7 @@ class Diagnosticos(BaseModel):
 class Prescricoes(BaseModel):
     __tablename__ = "prescricoes"
 
-    id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('prescricoes_id_seq'), primary_key=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
     conteudo = mapped_column(TEXT, nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())

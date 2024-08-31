@@ -1,4 +1,5 @@
 from faker import Faker
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models.db import (
@@ -12,13 +13,20 @@ from datetime import datetime
 fake = Faker('pt_BR')
 
 
+def get_nome(genero: GeneroEnum) -> str:
+    if genero == GeneroEnum.MASCULINO:
+        return fake.first_name_male() + ' ' + fake.last_name()
+    else:
+        return fake.first_name_female() + ' ' + fake.last_name()
+
 async def create_pacientes(session: AsyncSession, num: int = 100):
     pacientes = []
     for _ in range(num):
+        genero = choice(list(GeneroEnum))
         paciente = Pacientes(
-            nome=fake.name(),
+            nome=get_nome(genero),
             data_nascimento=fake.date_of_birth(minimum_age=18, maximum_age=90).strftime('%Y-%m-%d %H:%M:%S'),
-            genero=choice(list(GeneroEnum)),
+            genero=genero,
             endereco=fake.address(),
             telefone=fake.phone_number(),
             email=fake.email(),
@@ -33,8 +41,9 @@ async def create_pacientes(session: AsyncSession, num: int = 100):
 async def create_medicos(session: AsyncSession, num: int = 100):
     medicos = []
     for _ in range(num):
+        genero = choice(list(GeneroEnum))
         medico = Medicos(
-            nome=fake.name(),
+            nome=get_nome(genero),
             genero=choice(list(GeneroEnum)),
             crm=fake.bothify(text='CRM-####-UF'),
             especialidade=choice(list(EspecialidadeEnum)),
@@ -48,13 +57,13 @@ async def create_medicos(session: AsyncSession, num: int = 100):
 
 async def create_consultas(session: AsyncSession, num: int = 100):
     consultas = []
-    pacientes_ids = session.query(Pacientes.id).all()
-    medicos_ids = session.query(Medicos.id).all()
+    pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
+    medicos_ids = (await session.scalars(select(Medicos.id))).all()
 
     for _ in range(num):
         consulta = Consultas(
-            paciente_id=choice(pacientes_ids)[0],
-            profissional_id=choice(medicos_ids)[0],
+            paciente_id=choice(pacientes_ids),
+            profissional_id=choice(medicos_ids),
             data=fake.date_time_between(start_date='-1y', end_date='now'),
             tipo_consulta=choice(list(TipoConsultaEnum)).value,
             created_at=datetime.now(),
@@ -162,6 +171,7 @@ async def populate_all() -> None:
     async with LocalAsyncSession() as session:
         await create_pacientes(session)
         await create_medicos(session)
+        await create_consultas(session)
 
 
 if __name__ == "__main__":
