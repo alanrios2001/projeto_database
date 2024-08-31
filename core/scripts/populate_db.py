@@ -19,6 +19,96 @@ def get_nome(genero: GeneroEnum) -> str:
     else:
         return fake.first_name_female() + ' ' + fake.last_name()
 
+
+def generate_diagnostico_text():
+    sintomas = [
+        "dor abdominal", "febre alta", "tosse persistente",
+        "cansaço extremo", "inchaço nas pernas", "dor de cabeça intensa",
+        "perda de apetite", "dor no peito", "tontura", "náuseas",
+        "dificuldade para respirar", "coceira na pele", "manchas avermelhadas"
+    ]
+
+    conclusao = [
+        "Suspeita de infecção viral. Recomendado repouso e ingestão de líquidos.",
+        "Possível infecção bacteriana. Iniciado tratamento com antibiótico.",
+        "Sintomas indicam possível quadro de hipertensão. Sugerida consulta com cardiologista.",
+        "Alergia a substância não identificada. Indicado uso de anti-histamínico.",
+        "Quadro compatível com sinusite. Prescrito tratamento com descongestionante nasal.",
+        "Paciente apresenta sinais de bronquite. Iniciado tratamento com broncodilatador."
+    ]
+
+    diagnostico = (
+        f"Paciente relata {choice(sintomas)} há {fake.random_int(min=1, max=10)} dias. "
+        f"Exame físico revela {fake.word()} e {fake.word()}. "
+        f"{choice(conclusao)}"
+    )
+
+    return diagnostico
+
+
+def generate_prescricao_text():
+    medicamentos = [
+        "Paracetamol 500mg", "Amoxicilina 875mg", "Ibuprofeno 400mg",
+        "Omeprazol 20mg", "Captopril 25mg", "Lorazepam 2mg",
+        "Metformina 850mg", "Atenolol 50mg", "Diclofenaco 50mg",
+        "Prednisona 20mg", "Simvastatina 40mg"
+    ]
+
+    instrucoes = [
+        "Tomar 1 comprimido a cada 8 horas por 7 dias.",
+        "Tomar 1 comprimido antes das refeições por 10 dias.",
+        "Aplicar o creme 2 vezes ao dia por 14 dias.",
+        "Ingerir 1 cápsula ao acordar e outra ao deitar, por 30 dias.",
+        "Ingerir 1 comprimido ao dia, antes de dormir.",
+        "Tomar 1 comprimido após as refeições, por 15 dias.",
+        "Aplicar na área afetada 3 vezes ao dia.",
+        "Administrar 2 gotas a cada 4 horas, conforme necessário.",
+        "Usar 1 injeção subcutânea diariamente, por 7 dias."
+    ]
+
+    prescricao = (
+        f"{choice(medicamentos)} - {choice(instrucoes)} "
+        f"Em caso de reação adversa, {fake.catch_phrase().lower()}."
+    )
+
+    return prescricao
+
+
+def generate_prontuario_observacao():
+    estados = [
+        "Paciente apresenta sinais de melhora significativa.",
+        "Estado clínico estável, sem alterações nas últimas 24 horas.",
+        "Paciente relata dores ocasionais na região abdominal.",
+        "Sinais vitais dentro dos parâmetros normais.",
+        "Paciente continua em observação para monitoramento da febre.",
+        "Melhora gradual observada nas últimas 48 horas.",
+        "Paciente apresenta leve dificuldade respiratória.",
+        "Condição clínica deteriorada nas últimas 12 horas.",
+        "Paciente relata aumento de apetite e disposição.",
+        "Mantida a prescrição inicial. Monitoramento contínuo necessário."
+    ]
+
+    recomendacoes = [
+        "Recomendada continuidade do tratamento atual.",
+        "Sugerido ajuste na medicação para controle da dor.",
+        "Solicitado exame de sangue para monitorar níveis inflamatórios.",
+        "Recomendado repouso e hidratação abundante.",
+        "Encaminhado para consulta com especialista.",
+        "Acompanhamento diário até estabilização do quadro.",
+        "Agendada revisão em uma semana.",
+        "Revisão de medicação agendada para amanhã.",
+        "Paciente orientado sobre sinais de alerta e retorno imediato se necessário.",
+        "Sugerida alta hospitalar caso mantenha evolução positiva."
+    ]
+
+    observacao = (
+        f"{choice(estados)} {choice(recomendacoes)} "
+        f"Paciente segue orientações médicas conforme protocolo."
+    )
+
+    return observacao
+
+
 async def create_pacientes(session: AsyncSession, num: int = 100):
     pacientes = []
     for _ in range(num):
@@ -75,11 +165,11 @@ async def create_consultas(session: AsyncSession, num: int = 100):
 
 async def create_transacoes_financeiras(session: AsyncSession, num: int = 100):
     transacoes = []
-    pacientes_ids = session.query(Pacientes.id).all()
+    pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
 
     for _ in range(num):
         transacao = TransacoesFinanceiras(
-            paciente_id=choice(pacientes_ids)[0],
+            paciente_id=choice(pacientes_ids),
             tipo_transacao=choice(list(TipoTransacaoEnum)),
             valor=str(randint(100, 10000)),  # valor como string
             data=fake.date_time_between(start_date='-2y', end_date='now'),
@@ -92,12 +182,12 @@ async def create_transacoes_financeiras(session: AsyncSession, num: int = 100):
 
 async def create_prontuarios(session: AsyncSession, num: int = 100):
     prontuarios = []
-    pacientes_ids = session.query(Pacientes.id).all()
+    pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
 
     for _ in range(num):
         prontuario = Prontuarios(
-            paciente_id=choice(pacientes_ids)[0],
-            observacoes=fake.text(max_nb_chars=200),
+            paciente_id=choice(pacientes_ids),
+            observacoes=generate_prontuario_observacao(),
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
@@ -108,12 +198,12 @@ async def create_prontuarios(session: AsyncSession, num: int = 100):
 
 async def create_diagnosticos(session: AsyncSession, num: int = 100):
     diagnosticos = []
-    consultas_ids = session.query(Consultas.id).all()
+    consultas_ids = (await session.scalars(select(Consultas.id))).all()
 
     for _ in range(num):
         diagnostico = Diagnosticos(
-            consulta_id=choice(consultas_ids)[0],
-            conteudo=fake.text(max_nb_chars=200),
+            consulta_id=choice(consultas_ids),
+            conteudo=generate_diagnostico_text(),
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
@@ -124,12 +214,12 @@ async def create_diagnosticos(session: AsyncSession, num: int = 100):
 
 async def create_prescricoes(session: AsyncSession, num: int = 100):
     prescricoes = []
-    consultas_ids = session.query(Consultas.id).all()
+    consultas_ids = (await session.scalars(select(Consultas.id))).all()
 
     for _ in range(num):
         prescricao = Prescricoes(
-            consulta_id=choice(consultas_ids)[0],
-            conteudo=fake.text(max_nb_chars=200),
+            consulta_id=choice(consultas_ids),
+            conteudo=generate_prescricao_text(),
             created_at=datetime.now(),
         )
         prescricoes.append(prescricao)
@@ -172,6 +262,10 @@ async def populate_all() -> None:
         await create_pacientes(session)
         await create_medicos(session)
         await create_consultas(session)
+        await create_diagnosticos(session)
+        await create_prescricoes(session)
+        await create_prontuarios(session)
+        await create_transacoes_financeiras(session)
 
 
 if __name__ == "__main__":
