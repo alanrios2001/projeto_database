@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models.db import (
@@ -25,7 +25,7 @@ async def busca_medicamento(
         query = query.where(Medicamentos.quantidade == quantidade)
     if validade is not None:
         query = query.where(Medicamentos.validade == validade)
-
+    print(query)
     result = await session.scalars(query)
 
     if result:
@@ -35,12 +35,24 @@ async def busca_medicamento(
         return None
     for row in result:
         print('-----------------------------------')
+        print('ID:', row.id)
         print('Nome:', row.nome)
         print('Laboratório:', row.laboratorio)
         print('Quantidade:', row.quantidade)
         print('Validade:', row.validade)
 
     return result.all()
+
+
+async def retirar_medicamento(session: AsyncSession, medicamento_id: int, quantidade: int):
+    stmt = (
+        update(Medicamentos).
+        where(Medicamentos.id == medicamento_id).
+        values(quantidade=Medicamentos.quantidade - quantidade)
+    )
+    print(stmt)
+    await session.execute(stmt)
+    await session.commit()
 
 
 if __name__ == '__main__':
@@ -55,6 +67,7 @@ if __name__ == '__main__':
                                     quantidade=None,
                                     validade=None
                                     )
+            await retirar_medicamento(session, 2, 1)
 
 
     asyncio.run(main())
