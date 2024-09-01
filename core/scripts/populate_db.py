@@ -8,7 +8,6 @@ from core.models.db import (
     TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum
 )
 from random import choice, randint
-from datetime import datetime
 
 EQUIPAMENTOS_RECURSOS = [
         ("Ventilador Mecânico", "Dräger"),
@@ -210,6 +209,7 @@ def generate_prontuario_observacao():
 
 async def create_pacientes(session: AsyncSession, num: int):
     pacientes = []
+    values_list = []
     for _ in range(num):
         genero = choice(list(GeneroEnum))
         paciente = Pacientes(
@@ -219,33 +219,63 @@ async def create_pacientes(session: AsyncSession, num: int):
             endereco=fake.address(),
             telefone=fake.phone_number(),
             email=fake.email(),
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         pacientes.append(paciente)
+
+        values = (
+            f"'{paciente.nome}'",
+            f"'{paciente.data_nascimento}'",
+            f"'{paciente.genero.value}'",
+            f"'{paciente.endereco}'",
+            f"'{paciente.telefone}'",
+            f"'{paciente.email}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO pacientes (nome, data_nascimento, genero, endereco, telefone, email) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(pacientes)
     await session.commit()
 
 
 async def create_medicos(session: AsyncSession, num: int):
     medicos = []
+    values_list = []
     for _ in range(num):
         genero = choice(list(GeneroEnum))
         medico = Medicos(
             nome=get_nome(genero),
-            genero=choice(list(GeneroEnum)),
+            genero=genero,
             crm=fake.bothify(text='CRM-####-UF'),
             especialidade=choice(list(EspecialidadeEnum)),
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         medicos.append(medico)
+
+        values = (
+            f"'{medico.nome}'",
+            f"'{medico.genero.value}'",
+            f"'{medico.crm}'",
+            f"'{medico.especialidade.value}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO profissionais_saude (nome, genero, crm, especialidade) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(medicos)
     await session.commit()
 
 
 async def create_consultas(session: AsyncSession, num: int):
     consultas = []
+    values_list = []
     pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
     medicos_ids = (await session.scalars(select(Medicos.id))).all()
 
@@ -255,79 +285,146 @@ async def create_consultas(session: AsyncSession, num: int):
             profissional_id=choice(medicos_ids),
             data=fake.date_time_between(start_date='-1y', end_date='now'),
             tipo_consulta=choice(list(TipoConsultaEnum)).value,
-            created_at=datetime.now(),
         )
         consultas.append(consulta)
+
+        values = (
+            f"'{consulta.paciente_id}'",
+            f"'{consulta.profissional_id}'",
+            f"'{consulta.data}'",
+            f"'{consulta.tipo_consulta}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO consultas (paciente_id, profissional_id, data, tipo_consulta) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(consultas)
     await session.commit()
 
 
 async def create_transacoes_financeiras(session: AsyncSession, num: int):
     transacoes = []
+    values_list = []
     pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
 
     for _ in range(num):
         transacao = TransacoesFinanceiras(
             paciente_id=choice(pacientes_ids),
             tipo_transacao=choice(list(TipoTransacaoEnum)),
-            valor=str(randint(100, 10000)),  # valor como string
+            valor=str(randint(100, 10000)),
             data=fake.date_time_between(start_date='-2y', end_date='now'),
-            created_at=datetime.now(),
         )
         transacoes.append(transacao)
+
+        values = (
+            f"'{transacao.paciente_id}'",
+            f"'{transacao.tipo_transacao.value}'",
+            f"'{transacao.valor}'",
+            f"'{transacao.data}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO transacoes_financeiras (paciente_id, tipo_transacao, valor, data) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(transacoes)
     await session.commit()
 
 
 async def create_prontuarios(session: AsyncSession, num: int):
     prontuarios = []
+    values_list = []
     pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
 
     for _ in range(num):
         prontuario = Prontuarios(
             paciente_id=choice(pacientes_ids),
             observacoes=generate_prontuario_observacao(),
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         prontuarios.append(prontuario)
+
+        values = (
+            f"'{prontuario.paciente_id}'",
+            f"'{prontuario.observacoes}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO prontuarios (paciente_id, observacoes) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(prontuarios)
     await session.commit()
 
 
 async def create_diagnosticos(session: AsyncSession, num: int):
     diagnosticos = []
+    values_list = []
     consultas_ids = (await session.scalars(select(Consultas.id))).all()
 
     for _ in range(num):
         diagnostico = Diagnosticos(
             consulta_id=choice(consultas_ids),
             conteudo=generate_diagnostico_text(),
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         diagnosticos.append(diagnostico)
+
+        values = (
+            f"'{diagnostico.consulta_id}'",
+            f"'{diagnostico.conteudo}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO diagnosticos (consulta_id, conteudo) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(diagnosticos)
     await session.commit()
 
 
 async def create_prescricoes(session: AsyncSession, num: int):
     prescricoes = []
+    values_list = []
     consultas_ids = (await session.scalars(select(Consultas.id))).all()
 
     for _ in range(num):
         prescricao = Prescricoes(
             consulta_id=choice(consultas_ids),
             conteudo=generate_prescricao_text(),
-            created_at=datetime.now(),
         )
         prescricoes.append(prescricao)
+
+        values = (
+            f"'{prescricao.consulta_id}'",
+            f"'{prescricao.conteudo}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO prescricoes (consulta_id, conteudo) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(prescricoes)
     await session.commit()
 
 
 async def create_medicamentos(session: AsyncSession, num: int):
     medicamentos = []
+    values_list = []
     for _ in range(num):
         nome, laboratorio = choice(MEDICAMENTOS_LABORATORIOS)
         medicamento = Medicamentos(
@@ -335,31 +432,56 @@ async def create_medicamentos(session: AsyncSession, num: int):
             laboratorio=laboratorio,
             validade=fake.future_date(end_date='+2y'),
             quantidade=randint(10, 500),
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         medicamentos.append(medicamento)
+
+        values = (
+            f"'{medicamento.nome}'",
+            f"'{medicamento.laboratorio}'",
+            f"'{medicamento.validade}'",
+            f"'{medicamento.quantidade}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO medicamentos (nome, laboratorio, validade, quantidade) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+
+    print(sql_query)
     session.add_all(medicamentos)
     await session.commit()
 
 
 async def create_recursos_hospitalares(session: AsyncSession, num: int):
     recursos = []
+    values_list = []
     for _ in range(num):
         nome, marca = choice(EQUIPAMENTOS_RECURSOS)
         recurso = RecursosHospitalares(
             nome=nome,
             marca=marca,
             status=choice(list(StatusEnum)),
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         recursos.append(recurso)
+
+        values = (
+            f"'{recurso.nome}'",
+            f"'{recurso.marca}'",
+            f"'{recurso.status.value}'"
+        )
+        values_list.append(f"({', '.join(values)})")
+
+    sql_query = (
+        "INSERT INTO recursos_hospitalares (nome, marca, status) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    )
+    print(sql_query)
     session.add_all(recursos)
     await session.commit()
 
 
-async def populate_all(n: int = 100) -> None:
+async def populate_all(n: int = 15) -> None:
     async with LocalAsyncSession() as session:
         await create_pacientes(session, n)
         await create_medicos(session, n)
@@ -375,4 +497,4 @@ async def populate_all(n: int = 100) -> None:
 if __name__ == "__main__":
     import asyncio
 
-    asyncio.run(populate_all(100))
+    asyncio.run(populate_all(15))

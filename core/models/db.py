@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text, DATETIME
+from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text, DATETIME, FLOAT
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import (
     relationship,
@@ -14,6 +14,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from sqlalchemy.dialects.mysql import TEXT, VARCHAR
+from sqlalchemy.sql.ddl import CreateTable
 
 from config import settings
 
@@ -105,7 +106,7 @@ class TransacoesFinanceiras(BaseModel):
     id = Column(Integer, Sequence('transacoes_financeiras_id_seq'), primary_key=True, autoincrement=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
     tipo_transacao: Mapped[TipoTransacaoEnum] = mapped_column(nullable=False)
-    valor = mapped_column(TEXT, nullable=False)
+    valor = mapped_column(FLOAT, nullable=False)
     data = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
@@ -120,9 +121,9 @@ class Pacientes(BaseModel):
     nome = mapped_column(VARCHAR(100), nullable=False)
     data_nascimento = mapped_column(DATETIME, nullable=False)
     genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
-    endereco = mapped_column(TEXT, nullable=True)
-    telefone = mapped_column(TEXT, nullable=True)
-    email = mapped_column(TEXT, nullable=True)
+    endereco = mapped_column(VARCHAR(250), nullable=True)
+    telefone = mapped_column(VARCHAR(50), nullable=True)
+    email = mapped_column(VARCHAR(100), nullable=True)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
@@ -138,7 +139,7 @@ class Medicos(BaseModel):
     id = Column(Integer, Sequence('medicos_id_seq'), primary_key=True, autoincrement=True)
     nome = mapped_column(VARCHAR(100), nullable=False)
     genero: Mapped[GeneroEnum] = mapped_column(nullable=False)
-    crm = mapped_column(TEXT, nullable=False)
+    crm = mapped_column(VARCHAR(100), nullable=False)
     especialidade: Mapped[EspecialidadeEnum] = mapped_column(nullable=False)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
@@ -154,7 +155,7 @@ class Consultas(BaseModel):
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"), primary_key=True)
     profissional_id: Mapped[int] = mapped_column(ForeignKey("profissionais_saude.id"))
     data = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
-    tipo_consulta = mapped_column(TEXT, nullable=True)
+    tipo_consulta: Mapped[TipoConsultaEnum] = mapped_column(nullable=True)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
@@ -169,7 +170,7 @@ class Prontuarios(BaseModel):
 
     id = Column(Integer, Sequence('prontuarios_id_seq'), primary_key=True, autoincrement=True)
     paciente_id: Mapped[int] = mapped_column(ForeignKey("pacientes.id"))
-    observacoes = mapped_column(TEXT, nullable=True, default=None)
+    observacoes = mapped_column(VARCHAR(250), nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
@@ -182,7 +183,7 @@ class Diagnosticos(BaseModel):
 
     id = Column(Integer, Sequence('diagnosticos_id_seq'), primary_key=True, autoincrement=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
-    conteudo = mapped_column(TEXT, nullable=True, default=None)
+    conteudo = mapped_column(VARCHAR(500), nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     updated_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
@@ -195,7 +196,7 @@ class Prescricoes(BaseModel):
 
     id = Column(Integer, Sequence('prescricoes_id_seq'), primary_key=True, autoincrement=True)
     consulta_id: Mapped[int] = mapped_column(ForeignKey("consultas.id"))
-    conteudo = mapped_column(TEXT, nullable=True, default=None)
+    conteudo = mapped_column(VARCHAR(500), nullable=True, default=None)
     created_at = mapped_column(DATETIME, default=datetime.now, server_default=func.now())
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
@@ -228,6 +229,8 @@ class RecursosHospitalares(BaseModel):
 
 
 def create_database():
+    for table in BaseModel.metadata.tables.values():
+        print(str(CreateTable(table).compile(engine)))
     BaseModel.metadata.create_all(engine)
 
 
