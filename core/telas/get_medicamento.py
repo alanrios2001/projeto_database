@@ -8,14 +8,13 @@ from core.models.db import (
 )
 
 
-async def query_medicamento(
+async def busca_medicamento(
         session: AsyncSession,
         nome: str = None,
         laboratorio: str = None,
         quantidade: int = None,
         validade: str = None
 ):
-
     query = select(Medicamentos)
 
     if nome is not None:
@@ -29,17 +28,33 @@ async def query_medicamento(
 
     result = await session.scalars(query)
 
+    if result:
+        print('Medicamentos encontrados:')
+    else:
+        print('Nenhum medicamento encontrado.')
+        return None
+    for row in result:
+        print('-----------------------------------')
+        print('Nome:', row.nome)
+        print('Laboratório:', row.laboratorio)
+        print('Quantidade:', row.quantidade)
+        print('Validade:', row.validade)
+
     return result.all()
 
 
 if __name__ == '__main__':
     import asyncio
 
+
     async def main():
         async with LocalAsyncSession() as session:
-            result = await query_medicamento(session,
-                                             nome="Dipirona",
-                                             )
-            print(result)
+            await busca_medicamento(session,
+                                    nome="Amoxicilina",
+                                    laboratorio="EMS",
+                                    quantidade=None,
+                                    validade=None
+                                    )
+
 
     asyncio.run(main())
