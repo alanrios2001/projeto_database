@@ -2,9 +2,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models.db import (
-    LocalAsyncSession, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
-    Diagnosticos, Prescricoes, Medicamentos, RecursosHospitalares,
-    TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum
+    LocalAsyncSession, Medicamentos
 )
 
 
@@ -25,7 +23,7 @@ async def busca_medicamento(
         query = query.where(Medicamentos.quantidade == quantidade)
     if validade is not None:
         query = query.where(Medicamentos.validade == validade)
-    print(query)
+    #print(query)
     result = await session.scalars(query)
 
     if result:
@@ -50,7 +48,7 @@ async def retirar_medicamento(session: AsyncSession, medicamento_id: int, quanti
         where(Medicamentos.id == medicamento_id).
         values(quantidade=Medicamentos.quantidade - quantidade)
     )
-    print(stmt)
+    #print(stmt)
     await session.execute(stmt)
     await session.commit()
 
