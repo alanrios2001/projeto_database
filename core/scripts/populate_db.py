@@ -235,7 +235,7 @@ async def create_pacientes(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO pacientes (nome, data_nascimento, genero, endereco, telefone, email) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(pacientes)
@@ -266,7 +266,7 @@ async def create_medicos(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO profissionais_saude (nome, genero, crm, especialidade) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(medicos)
@@ -299,7 +299,7 @@ async def create_consultas(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO consultas (paciente_id, profissional_id, data, tipo_consulta) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(consultas)
@@ -331,7 +331,7 @@ async def create_transacoes_financeiras(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO transacoes_financeiras (paciente_id, tipo_transacao, valor, data) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(transacoes)
@@ -359,7 +359,7 @@ async def create_prontuarios(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO prontuarios (paciente_id, observacoes) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(prontuarios)
@@ -387,7 +387,7 @@ async def create_diagnosticos(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO diagnosticos (consulta_id, conteudo) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(diagnosticos)
@@ -415,7 +415,7 @@ async def create_prescricoes(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO prescricoes (consulta_id, conteudo) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(prescricoes)
@@ -446,7 +446,7 @@ async def create_medicamentos(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO medicamentos (nome, laboratorio, validade, quantidade) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
 
     print(sql_query)
     session.add_all(medicamentos)
@@ -475,7 +475,7 @@ async def create_recursos_hospitalares(session: AsyncSession, num: int):
     sql_query = (
         "INSERT INTO recursos_hospitalares (nome, marca, status) "
         "VALUES\n" + ",\n".join(values_list) + ";"
-    )
+    ) + "\n"
     print(sql_query)
     session.add_all(recursos)
     await session.commit()
