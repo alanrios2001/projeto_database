@@ -1,10 +1,8 @@
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models.db import (
-    LocalAsyncSession, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
-    Diagnosticos, Prescricoes, Medicamentos, RecursosHospitalares,
-    TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum
+    LocalAsyncSession, Pacientes, GeneroEnum
 )
 
 
