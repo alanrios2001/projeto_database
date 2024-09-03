@@ -1,7 +1,8 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text, DATETIME, FLOAT
+from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text, DATETIME, FLOAT, \
+    UniqueConstraint
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import (
     relationship,
@@ -13,7 +14,7 @@ from sqlalchemy.orm import (
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from sqlalchemy.dialects.mysql import TEXT, VARCHAR
+from sqlalchemy.dialects.mysql import VARCHAR
 from sqlalchemy.sql.ddl import CreateTable
 
 from config import settings
@@ -24,7 +25,6 @@ HOST = settings.database.HOST
 PORT = settings.database.PORT
 DATABASE = settings.database.DATABASE
 
-# engine = create_engine('duckdb:///meu_banco.duckdb')
 
 connection_string = f"mysql+mysqldb://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/"
 
@@ -51,6 +51,10 @@ async_engine = create_async_engine(
 LocalSession = sessionmaker(engine, autocommit=False)
 
 LocalAsyncSession = async_sessionmaker(async_engine, autocommit=False)
+
+duck_db_engine = create_engine('duckdb:///sistema_hospitalar.duckdb')
+
+LocalSessionDuckDB = sessionmaker(duck_db_engine, autocommit=False)
 
 
 class GeneroEnum(enum.Enum):
@@ -164,6 +168,8 @@ class Consultas(BaseModel):
     diagnosticos: Mapped['Diagnosticos'] = relationship(back_populates="consulta")
     prescricoes: Mapped['Prescricoes'] = relationship(back_populates="consulta")
 
+    __table_args__ = (UniqueConstraint('id'),)
+
 
 class Prontuarios(BaseModel):
     __tablename__ = "prontuarios"
@@ -228,11 +234,15 @@ class RecursosHospitalares(BaseModel):
     deleted_at = mapped_column(DATETIME, default=None, server_default=None)
 
 
-def create_database():
+def create_database(sgb: str = 'mysql'):
+    if sgb == 'mysql':
+        local_engine = engine
+    elif sgb == 'duckdb':
+        local_engine = duck_db_engine
     for table in BaseModel.metadata.tables.values():
-        print(str(CreateTable(table).compile(engine)))
-    BaseModel.metadata.create_all(engine)
+        print(str(CreateTable(table).compile(local_engine)))
+    BaseModel.metadata.create_all(local_engine)
 
 
 if __name__ == "__main__":
-    create_database()
+    create_database('duckdb')
