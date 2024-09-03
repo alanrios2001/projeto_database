@@ -1,113 +1,111 @@
 from faker import Faker
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from core.models.db import (
-    LocalAsyncSession, LocalSessionDuckDB, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
+    LocalSessionDuckDB, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
     Diagnosticos, Prescricoes, Medicamentos, RecursosHospitalares,
     TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum, LocalSession
 )
 from random import choice, randint
 
 EQUIPAMENTOS_RECURSOS = [
-        ("Ventilador Mecânico", "Dräger"),
-        ("Ventilador Mecânico", "GE Healthcare"),
-        ("Monitor Cardíaco", "Philips"),
-        ("Monitor Cardíaco", "Mindray"),
-        ("Desfibrilador", "Zoll"),
-        ("Desfibrilador", "Philips"),
-        ("Bomba de Infusão", "B.Braun"),
-        ("Bomba de Infusão", "Fresenius"),
-        ("Oxímetro de Pulso", "Nonin Medical"),
-        ("Oxímetro de Pulso", "GE Healthcare"),
-        ("Aspirador Cirúrgico", "Medela"),
-        ("Aspirador Cirúrgico", "Stryker"),
-        ("Eletrocardiógrafo", "GE Healthcare"),
-        ("Eletrocardiógrafo", "Philips"),
-        ("Ultrassom", "Samsung Medison"),
-        ("Ultrassom", "GE Healthcare"),
-        ("Tomógrafo", "Siemens"),
-        ("Tomógrafo", "GE Healthcare"),
-        ("Máquina de Hemodiálise", "Fresenius"),
-        ("Máquina de Hemodiálise", "Nipro"),
-        ("Incubadora Neonatal", "Dräger"),
-        ("Incubadora Neonatal", "GE Healthcare"),
-        ("Autoclave", "Phoenix Luferco"),
-        ("Autoclave", "Cristofoli"),
-        ("Estetoscópio", "Littmann"),
-        ("Estetoscópio", "Welch Allyn"),
-        ("Termômetro Digital", "Omron"),
-        ("Termômetro Digital", "Braun"),
-        ("Cadeira de Rodas", "Ortobras"),
-        ("Cadeira de Rodas", "Freedom"),
-        ("Mesa Cirúrgica", "Maquet"),
-        ("Mesa Cirúrgica", "Stryker"),
-        ("Laringoscópio", "Welch Allyn"),
-        ("Laringoscópio", "HEINE"),
-        ("Esfigmomanômetro", "Welch Allyn"),
-        ("Esfigmomanômetro", "Riester"),
-        ("Lanterna Clínica", "HEINE"),
-        ("Lanterna Clínica", "Welch Allyn"),
-        ("Balança Antropométrica", "Filizola"),
-        ("Balança Antropométrica", "Welmy"),
-        ("Carrinho de Parada", "FAMI"),
-        ("Carrinho de Parada", "Olidef"),
-        ("Bisturi Elétrico", "Valleylab"),
-        ("Bisturi Elétrico", "Medtronic"),
-        ("Microscópio Cirúrgico", "Zeiss"),
-        ("Microscópio Cirúrgico", "Leica Microsystems"),
-        ("Colchão Pneumático", "Airbed"),
-        ("Colchão Pneumático", "ComfortPlus"),
-        ("Monitor Multiparâmetros", "Philips"),
-        ("Monitor Multiparâmetros", "Mindray"),
-        ("Carro de Emergência", "FAMI"),
-        ("Carro de Emergência", "Olidef"),
-        ("Ventilador Portátil", "Weinmann"),
-        ("Ventilador Portátil", "Philips"),
-        ("Bombas de Seringa", "B.Braun"),
-        ("Bombas de Seringa", "Fresenius"),
-        ("Mesa Ginecológica", "Biodex"),
-        ("Mesa Ginecológica", "Carci"),
-        ("Compressor de Ar", "Schulz"),
-        ("Compressor de Ar", "Medic Air"),
-        ("Iluminador Cirúrgico", "Dräger"),
-        ("Iluminador Cirúrgico", "Philips")
-    ]
+    ("Ventilador Mecânico", "Dräger"),
+    ("Ventilador Mecânico", "GE Healthcare"),
+    ("Monitor Cardíaco", "Philips"),
+    ("Monitor Cardíaco", "Mindray"),
+    ("Desfibrilador", "Zoll"),
+    ("Desfibrilador", "Philips"),
+    ("Bomba de Infusão", "B.Braun"),
+    ("Bomba de Infusão", "Fresenius"),
+    ("Oxímetro de Pulso", "Nonin Medical"),
+    ("Oxímetro de Pulso", "GE Healthcare"),
+    ("Aspirador Cirúrgico", "Medela"),
+    ("Aspirador Cirúrgico", "Stryker"),
+    ("Eletrocardiógrafo", "GE Healthcare"),
+    ("Eletrocardiógrafo", "Philips"),
+    ("Ultrassom", "Samsung Medison"),
+    ("Ultrassom", "GE Healthcare"),
+    ("Tomógrafo", "Siemens"),
+    ("Tomógrafo", "GE Healthcare"),
+    ("Máquina de Hemodiálise", "Fresenius"),
+    ("Máquina de Hemodiálise", "Nipro"),
+    ("Incubadora Neonatal", "Dräger"),
+    ("Incubadora Neonatal", "GE Healthcare"),
+    ("Autoclave", "Phoenix Luferco"),
+    ("Autoclave", "Cristofoli"),
+    ("Estetoscópio", "Littmann"),
+    ("Estetoscópio", "Welch Allyn"),
+    ("Termômetro Digital", "Omron"),
+    ("Termômetro Digital", "Braun"),
+    ("Cadeira de Rodas", "Ortobras"),
+    ("Cadeira de Rodas", "Freedom"),
+    ("Mesa Cirúrgica", "Maquet"),
+    ("Mesa Cirúrgica", "Stryker"),
+    ("Laringoscópio", "Welch Allyn"),
+    ("Laringoscópio", "HEINE"),
+    ("Esfigmomanômetro", "Welch Allyn"),
+    ("Esfigmomanômetro", "Riester"),
+    ("Lanterna Clínica", "HEINE"),
+    ("Lanterna Clínica", "Welch Allyn"),
+    ("Balança Antropométrica", "Filizola"),
+    ("Balança Antropométrica", "Welmy"),
+    ("Carrinho de Parada", "FAMI"),
+    ("Carrinho de Parada", "Olidef"),
+    ("Bisturi Elétrico", "Valleylab"),
+    ("Bisturi Elétrico", "Medtronic"),
+    ("Microscópio Cirúrgico", "Zeiss"),
+    ("Microscópio Cirúrgico", "Leica Microsystems"),
+    ("Colchão Pneumático", "Airbed"),
+    ("Colchão Pneumático", "ComfortPlus"),
+    ("Monitor Multiparâmetros", "Philips"),
+    ("Monitor Multiparâmetros", "Mindray"),
+    ("Carro de Emergência", "FAMI"),
+    ("Carro de Emergência", "Olidef"),
+    ("Ventilador Portátil", "Weinmann"),
+    ("Ventilador Portátil", "Philips"),
+    ("Bombas de Seringa", "B.Braun"),
+    ("Bombas de Seringa", "Fresenius"),
+    ("Mesa Ginecológica", "Biodex"),
+    ("Mesa Ginecológica", "Carci"),
+    ("Compressor de Ar", "Schulz"),
+    ("Compressor de Ar", "Medic Air"),
+    ("Iluminador Cirúrgico", "Dräger"),
+    ("Iluminador Cirúrgico", "Philips")
+]
 
 MEDICAMENTOS_LABORATORIOS = [
-        ("Paracetamol", "EMS"),
-        ("Ibuprofeno", "Bayer"),
-        ("Amoxicilina", "GlaxoSmithKline"),
-        ("Omeprazol", "Aché"),
-        ("Simvastatina", "Medley"),
-        ("Atenolol", "AstraZeneca"),
-        ("Diclofenaco", "Novartis"),
-        ("Prednisona", "EMS"),
-        ("Metformina", "Merck"),
-        ("Losartana", "Torrent"),
-        ("Enalapril", "Pfizer"),
-        ("Clopidogrel", "Sanofi"),
-        ("Aspirina", "Bayer"),
-        ("Levotiroxina", "Sanofi"),
-        ("Metoprolol", "Novartis"),
-        ("Lorazepam", "Teva"),
-        ("Cetirizina", "Pfizer"),
-        ("Cetoprofeno", "Bayer"),
-        ("Diazepam", "Roche"),
-        ("Fluconazol", "Pfizer"),
-        ("Amoxicilina", "EMS"),
-        ("Simvastatina", "EMS"),
-        ("Paracetamol", "Medley"),
-        ("Omeprazol", "Bayer"),
-        ("Metformina", "EMS"),
-        ("Atenolol", "Medley"),
-        ("Diclofenaco", "EMS"),
-        ("Prednisona", "Sanofi"),
-        ("Levotiroxina", "Merck"),
-        ("Fluconazol", "Teva")
-    ]
-
+    ("Paracetamol", "EMS"),
+    ("Ibuprofeno", "Bayer"),
+    ("Amoxicilina", "GlaxoSmithKline"),
+    ("Omeprazol", "Aché"),
+    ("Simvastatina", "Medley"),
+    ("Atenolol", "AstraZeneca"),
+    ("Diclofenaco", "Novartis"),
+    ("Prednisona", "EMS"),
+    ("Metformina", "Merck"),
+    ("Losartana", "Torrent"),
+    ("Enalapril", "Pfizer"),
+    ("Clopidogrel", "Sanofi"),
+    ("Aspirina", "Bayer"),
+    ("Levotiroxina", "Sanofi"),
+    ("Metoprolol", "Novartis"),
+    ("Lorazepam", "Teva"),
+    ("Cetirizina", "Pfizer"),
+    ("Cetoprofeno", "Bayer"),
+    ("Diazepam", "Roche"),
+    ("Fluconazol", "Pfizer"),
+    ("Amoxicilina", "EMS"),
+    ("Simvastatina", "EMS"),
+    ("Paracetamol", "Medley"),
+    ("Omeprazol", "Bayer"),
+    ("Metformina", "EMS"),
+    ("Atenolol", "Medley"),
+    ("Diclofenaco", "EMS"),
+    ("Prednisona", "Sanofi"),
+    ("Levotiroxina", "Merck"),
+    ("Fluconazol", "Teva")
+]
 
 fake = Faker('pt_BR')
 
@@ -234,9 +232,9 @@ def create_pacientes(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO pacientes (nome, data_nascimento, genero, endereco, telefone, email) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO pacientes (nome, data_nascimento, genero, endereco, telefone, email) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(pacientes)
@@ -265,9 +263,9 @@ def create_medicos(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO profissionais_saude (nome, genero, crm, especialidade) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO profissionais_saude (nome, genero, crm, especialidade) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(medicos)
@@ -298,9 +296,9 @@ def create_consultas(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO consultas (paciente_id, profissional_id, data, tipo_consulta) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO consultas (paciente_id, profissional_id, data, tipo_consulta) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(consultas)
@@ -330,9 +328,9 @@ def create_transacoes_financeiras(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO transacoes_financeiras (paciente_id, tipo_transacao, valor, data) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO transacoes_financeiras (paciente_id, tipo_transacao, valor, data) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(transacoes)
@@ -358,9 +356,9 @@ def create_prontuarios(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO prontuarios (paciente_id, observacoes) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO prontuarios (paciente_id, observacoes) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(prontuarios)
@@ -386,9 +384,9 @@ def create_diagnosticos(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO diagnosticos (consulta_id, conteudo) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO diagnosticos (consulta_id, conteudo) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(diagnosticos)
@@ -414,9 +412,9 @@ def create_prescricoes(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO prescricoes (consulta_id, conteudo) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO prescricoes (consulta_id, conteudo) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(prescricoes)
@@ -445,9 +443,9 @@ def create_medicamentos(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO medicamentos (nome, laboratorio, validade, quantidade) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO medicamentos (nome, laboratorio, validade, quantidade) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(medicamentos)
@@ -474,9 +472,9 @@ def create_recursos_hospitalares(session: Session, num: int):
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-        "INSERT INTO recursos_hospitalares (nome, marca, status) "
-        "VALUES\n" + ",\n".join(values_list) + ";"
-    ) + "\n"
+                        "INSERT INTO recursos_hospitalares (nome, marca, status) "
+                        "VALUES\n" + ",\n".join(values_list) + ";"
+                ) + "\n"
 
     print(sql_query)
     session.add_all(recursos)
