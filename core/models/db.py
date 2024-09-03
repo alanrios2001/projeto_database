@@ -1,4 +1,5 @@
 import enum
+import os
 from datetime import datetime
 
 from sqlalchemy import create_engine, ForeignKey, func, Column, Integer, Sequence, text, DATETIME, FLOAT, \
@@ -52,7 +53,11 @@ LocalSession = sessionmaker(engine, autocommit=False)
 
 LocalAsyncSession = async_sessionmaker(async_engine, autocommit=False)
 
-duck_db_engine = create_engine('duckdb:///sistema_hospitalar.duckdb')
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+duck_db_path = os.path.join(base_dir, 'sistema_hospitalar.duckdb')
+
+duck_db_engine = create_engine(f'duckdb:///{duck_db_path}')
 
 LocalSessionDuckDB = sessionmaker(duck_db_engine, autocommit=False)
 
@@ -245,4 +250,4 @@ def create_database(sgb: str = 'mysql'):
 
 
 if __name__ == "__main__":
-    create_database('mysql')
+    create_database('duckdb')

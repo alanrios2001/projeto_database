@@ -494,5 +494,14 @@ def populate_all(session: Session, n: int = 15) -> None:
 
 
 if __name__ == "__main__":
-    with LocalSession() as session:
-        populate_all(session, 50)
+
+    sgbd = ''
+    while sgbd not in ['mysql', 'duckdb']:
+        sgbd = input('Digite o SGBD que deseja utilizar ("mysql" ou "duckdb"): ').lower()
+
+    if sgbd == 'mysql':
+        with LocalSession() as session:
+            populate_all(session, 50)
+    elif sgbd == 'duckdb':
+        with LocalSessionDuckDB() as session:
+            populate_all(session, 50)
