@@ -245,4 +245,4 @@ def create_database(sgb: str = 'mysql'):
 
 
 if __name__ == "__main__":
-    create_database('duckdb')
+    create_database('mysql')

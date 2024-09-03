@@ -1,11 +1,12 @@
 from faker import Faker
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from core.models.db import (
-    LocalAsyncSession, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
+    LocalAsyncSession, LocalSessionDuckDB, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
     Diagnosticos, Prescricoes, Medicamentos, RecursosHospitalares,
-    TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum
+    TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum, LocalSession
 )
 from random import choice, randint
 
@@ -207,7 +208,7 @@ def generate_prontuario_observacao():
     return observacao
 
 
-async def create_pacientes(session: AsyncSession, num: int):
+def create_pacientes(session: Session, num: int):
     pacientes = []
     values_list = []
     for _ in range(num):
@@ -239,10 +240,10 @@ async def create_pacientes(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(pacientes)
-    await session.commit()
+    session.commit()
 
 
-async def create_medicos(session: AsyncSession, num: int):
+def create_medicos(session: Session, num: int):
     medicos = []
     values_list = []
     for _ in range(num):
@@ -270,14 +271,14 @@ async def create_medicos(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(medicos)
-    await session.commit()
+    session.commit()
 
 
-async def create_consultas(session: AsyncSession, num: int):
+def create_consultas(session: Session, num: int):
     consultas = []
     values_list = []
-    pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
-    medicos_ids = (await session.scalars(select(Medicos.id))).all()
+    pacientes_ids = (session.scalars(select(Pacientes.id))).all()
+    medicos_ids = (session.scalars(select(Medicos.id))).all()
 
     for _ in range(num):
         consulta = Consultas(
@@ -303,13 +304,13 @@ async def create_consultas(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(consultas)
-    await session.commit()
+    session.commit()
 
 
-async def create_transacoes_financeiras(session: AsyncSession, num: int):
+def create_transacoes_financeiras(session: Session, num: int):
     transacoes = []
     values_list = []
-    pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
+    pacientes_ids = (session.scalars(select(Pacientes.id))).all()
 
     for _ in range(num):
         transacao = TransacoesFinanceiras(
@@ -335,13 +336,13 @@ async def create_transacoes_financeiras(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(transacoes)
-    await session.commit()
+    session.commit()
 
 
-async def create_prontuarios(session: AsyncSession, num: int):
+def create_prontuarios(session: Session, num: int):
     prontuarios = []
     values_list = []
-    pacientes_ids = (await session.scalars(select(Pacientes.id))).all()
+    pacientes_ids = (session.scalars(select(Pacientes.id))).all()
 
     for _ in range(num):
         prontuario = Prontuarios(
@@ -363,13 +364,13 @@ async def create_prontuarios(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(prontuarios)
-    await session.commit()
+    session.commit()
 
 
-async def create_diagnosticos(session: AsyncSession, num: int):
+def create_diagnosticos(session: Session, num: int):
     diagnosticos = []
     values_list = []
-    consultas_ids = (await session.scalars(select(Consultas.id))).all()
+    consultas_ids = (session.scalars(select(Consultas.id))).all()
 
     for _ in range(num):
         diagnostico = Diagnosticos(
@@ -391,13 +392,13 @@ async def create_diagnosticos(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(diagnosticos)
-    await session.commit()
+    session.commit()
 
 
-async def create_prescricoes(session: AsyncSession, num: int):
+def create_prescricoes(session: Session, num: int):
     prescricoes = []
     values_list = []
-    consultas_ids = (await session.scalars(select(Consultas.id))).all()
+    consultas_ids = (session.scalars(select(Consultas.id))).all()
 
     for _ in range(num):
         prescricao = Prescricoes(
@@ -419,10 +420,10 @@ async def create_prescricoes(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(prescricoes)
-    await session.commit()
+    session.commit()
 
 
-async def create_medicamentos(session: AsyncSession, num: int):
+def create_medicamentos(session: Session, num: int):
     medicamentos = []
     values_list = []
     for _ in range(num):
@@ -450,10 +451,10 @@ async def create_medicamentos(session: AsyncSession, num: int):
 
     print(sql_query)
     session.add_all(medicamentos)
-    await session.commit()
+    session.commit()
 
 
-async def create_recursos_hospitalares(session: AsyncSession, num: int):
+def create_recursos_hospitalares(session: Session, num: int):
     recursos = []
     values_list = []
     for _ in range(num):
@@ -476,25 +477,24 @@ async def create_recursos_hospitalares(session: AsyncSession, num: int):
         "INSERT INTO recursos_hospitalares (nome, marca, status) "
         "VALUES\n" + ",\n".join(values_list) + ";"
     ) + "\n"
+
     print(sql_query)
     session.add_all(recursos)
-    await session.commit()
+    session.commit()
 
 
-async def populate_all(n: int = 15) -> None:
-    async with LocalAsyncSession() as session:
-        await create_pacientes(session, n)
-        await create_medicos(session, n)
-        await create_consultas(session, n)
-        await create_diagnosticos(session, n)
-        await create_prescricoes(session, n)
-        await create_prontuarios(session, n)
-        await create_transacoes_financeiras(session, n)
-        await create_medicamentos(session, n)
-        await create_recursos_hospitalares(session, n)
+def populate_all(session: Session, n: int = 15) -> None:
+    create_pacientes(session, n)
+    create_medicos(session, n)
+    create_consultas(session, n)
+    create_diagnosticos(session, n)
+    create_prescricoes(session, n)
+    create_prontuarios(session, n)
+    create_transacoes_financeiras(session, n)
+    create_medicamentos(session, n)
+    create_recursos_hospitalares(session, n)
 
 
 if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(populate_all(50))
+    with LocalSession() as session:
+        populate_all(session, 50)
