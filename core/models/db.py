@@ -250,4 +250,7 @@ def create_database(sgb: str = 'mysql'):
 
 
 if __name__ == "__main__":
-    create_database('duckdb')
+    sgbd = ''
+    while sgbd not in ['mysql', 'duckdb']:
+        sgbd = input('Digite o SGBD para criar o banco e as tabelas(mysql ou duckdb): ')
+    create_database(sgbd)
