@@ -1,13 +1,15 @@
+from datetime import datetime
+
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from core.models.db import (
-    LocalAsyncSession, Pacientes, GeneroEnum
+    LocalAsyncSession, Pacientes, GeneroEnum, LocalSession, LocalSessionDuckDB
 )
 
 
-async def registrar_paciente(
-        session: AsyncSession,
+def registrar_paciente(
+        session: Session,
         nome: str,
         data_nascimento: str,
         genero: GeneroEnum,
@@ -25,14 +27,14 @@ async def registrar_paciente(
     )
 
     session.add(paciente)
-    await session.commit()
+    session.commit()
 
     return paciente
 
 
-async def consultar_paciente(session: AsyncSession, nome: str):
+def consultar_paciente(session: Session, nome: str):
     query = select(Pacientes).where(Pacientes.nome.like(nome))
-    result = (await session.scalars(query)).all()
+    result = (session.scalars(query)).all()
 
     # print(query)
     if not result:
@@ -50,20 +52,55 @@ async def consultar_paciente(session: AsyncSession, nome: str):
         print('Email:', r.email)
     return result
 
-if __name__ == '__main__':
-    import asyncio
 
-    async def main():
-        async with LocalAsyncSession() as session:
-            await registrar_paciente(
+def interface(session: Session):
+    while True:
+        print('Selecione uma opção:')
+        print('1 - Registrar paciente')
+        print('2 - Consultar paciente')
+        print('q - Sair')
+        opcao = input('Opção: ')
+
+        if opcao == '1':
+            nome = input('Nome: ')
+            data_nascimento = input('Data de nascimento: ')
+            genero = input('Gênero(MASCULINO, FEMININO): ')
+            endereco = input('Endereço: ')
+            telefone = input('Telefone: ')
+            email = input('Email: ')
+
+            # verifica se o genero é válido, se não for, pede para digitar novamente somente o genero
+            while genero not in ['MASCULINO', 'FEMININO', 'masculino', 'feminino']:
+                genero = input('Gênero(MASCULINO, FEMININO): ')
+
+            #formata a data de nascimento para datetime
+            data_nascimento = datetime.strptime(data_nascimento, '%d/%m/%Y')
+
+            registrar_paciente(
                 session,
-                nome="João da Silva",
-                data_nascimento="1990-01-01",
-                genero=GeneroEnum.MASCULINO,
-                endereco="Rua das Flores, 123",
-                telefone="(11) 99999-9999",
-                email="@g.com")
+                nome=nome,
+                data_nascimento=data_nascimento,
+                genero=GeneroEnum[genero.upper()],
+                endereco=endereco,
+                telefone=telefone,
+                email=email
+            )
+        elif opcao == '2':
+            nome = input('Nome: ')
+            consultar_paciente(session, nome=nome)
+        elif opcao == 'q':
+            break
+        else:
+            print('Opção inválida.')
 
-            await consultar_paciente(session, nome="João da Silva")
 
-    asyncio.run(main())
+if __name__ == '__main__':
+    sgbd = ''
+    while sgbd not in ['mysql', 'duckdb']:
+        sgbd = input('Digite o SGBD para criar o banco e as tabelas(mysql ou duckdb): ')
+    if sgbd == 'mysql':
+        with LocalSession() as session:
+            interface(session)
+    else:
+        with LocalSessionDuckDB() as session:
+            interface(session)

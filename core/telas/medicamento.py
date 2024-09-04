@@ -1,30 +1,24 @@
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from core.models.db import (
-    LocalAsyncSession, Medicamentos
+    Medicamentos, LocalSession, LocalSessionDuckDB
 )
 
 
-async def busca_medicamento(
-        session: AsyncSession,
+def busca_medicamento(
+        session: Session,
         nome: str = None,
         laboratorio: str = None,
-        quantidade: int = None,
-        validade: str = None
 ):
     query = select(Medicamentos)
 
     if nome is not None:
         query = query.where(Medicamentos.nome == nome)
     if laboratorio is not None:
-        query = query.where(Medicamentos.laboratorio == laboratorio)
-    if quantidade is not None:
-        query = query.where(Medicamentos.quantidade == quantidade)
-    if validade is not None:
-        query = query.where(Medicamentos.validade == validade)
+        query = query.where(Medicamentos.laboratorio.like(f'%{laboratorio}%'))
     #print(query)
-    result = await session.scalars(query)
+    result = session.scalars(query)
 
     if result:
         print('Medicamentos encontrados:')
@@ -42,30 +36,46 @@ async def busca_medicamento(
     return result.all()
 
 
-async def retirar_medicamento(session: AsyncSession, medicamento_id: int, quantidade: int):
+def retirar_medicamento(session: Session, medicamento_id: int, quantidade: int):
     stmt = (
         update(Medicamentos).
         where(Medicamentos.id == medicamento_id).
         values(quantidade=Medicamentos.quantidade - quantidade)
     )
     #print(stmt)
-    await session.execute(stmt)
-    await session.commit()
+    session.execute(stmt)
+    session.commit()
+
+
+def interface(session: Session):
+    # Interface para buscar medicamentos pelo nome e/ou laboratorio e retirar medicamentos q para sair
+    # Pode selecionar entre buscar medicamento ou retirar medicamento
+    while True:
+        print('Selecione uma opção:')
+        print('1 - Buscar medicamento')
+        print('2 - Retirar medicamento')
+        print('q - Sair')
+        opcao = input('Opção: ')
+        if opcao == 'q':
+            break
+        if opcao == '1':
+            nome = input('Digite o nome do medicamento: ')
+            laboratorio = input('Digite o laboratório do medicamento: ')
+            busca_medicamento(session, nome, laboratorio)
+        elif opcao == '2':
+            medicamento_id = int(input('Digite o ID do medicamento: '))
+            quantidade = int(input('Digite a quantidade a ser retirada: '))
+            retirar_medicamento(session, medicamento_id, quantidade)
 
 
 if __name__ == '__main__':
-    import asyncio
 
-
-    async def main():
-        async with LocalAsyncSession() as session:
-            await busca_medicamento(session,
-                                    nome="Amoxicilina",
-                                    laboratorio="EMS",
-                                    quantidade=None,
-                                    validade=None
-                                    )
-            await retirar_medicamento(session, 2, 1)
-
-
-    asyncio.run(main())
+    sgbd = ''
+    while sgbd not in ['mysql', 'duckdb']:
+        sgbd = input('Digite o SGBD para criar o banco e as tabelas(mysql ou duckdb): ')
+    if sgbd == 'mysql':
+        with LocalSession() as session:
+            interface(session)
+    else:
+        with LocalSessionDuckDB() as session:
+            interface(session)
