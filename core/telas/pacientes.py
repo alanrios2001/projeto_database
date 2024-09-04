@@ -100,7 +100,7 @@ def interface(session: Session):
 
 if __name__ == "__main__":
     sgbd = ""
-    while sgbd not in ["mysql", "duckdb"]:
+    while sgbd not in ["mysql", "duckdb", "q"]:
         sgbd = input("Digite o SGBD para criar o banco e as tabelas(mysql ou duckdb): ")
     if sgbd == "mysql":
         with LocalSession() as session:

@@ -40,7 +40,7 @@ def interface(session: Session):
 
 if __name__ == "__main__":
     sgbd = ""
-    while sgbd not in ["mysql", "duckdb"]:
+    while sgbd not in ["mysql", "duckdb", "q"]:
         sgbd = input("Digite o SGBD para utilizar na busca do dados(mysql ou duckdb): ")
     if sgbd == "mysql":
         with LocalSession() as session:
