@@ -1,5 +1,5 @@
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload, Session
+from sqlalchemy import select, func
+from sqlalchemy.orm import Session, joinedload
 
 from core.models.db import Consultas, Pacientes, LocalSession, LocalSessionDuckDB
 
@@ -8,8 +8,8 @@ def buscar_consulta_paciente(session: Session, nome: str):
     query = (
         select(Consultas)
         .join(Pacientes, Consultas.paciente_id == Pacientes.id)
-        .options(selectinload(Consultas.paciente), selectinload(Consultas.medico))
-        .where(Pacientes.nome.like(f"%{nome}%"))
+        .options(joinedload(Consultas.paciente), joinedload(Consultas.medico))
+        .where(func.lower(Pacientes.nome).like(f"%{nome.lower()}%"))
     )
 
     # print(query)

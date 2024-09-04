@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from sqlalchemy.orm import Session
 
 from core.models.db import Medicamentos, LocalSession, LocalSessionDuckDB
@@ -9,14 +9,20 @@ def busca_medicamento(
     nome: str = None,
     laboratorio: str = None,
 ):
-    query = select(Medicamentos)
-
-    if nome is not None:
-        query = query.where(Medicamentos.nome == nome)
-    if laboratorio is not None:
-        query = query.where(Medicamentos.laboratorio.like(f"%{laboratorio}%"))
-    # print(query)
-    result = session.scalars(query)
+    query = (
+        select(Medicamentos)
+        .where(
+            func.lower(Medicamentos.nome).like(f"%{nome.lower()}%")
+            if nome is not None
+            else Medicamentos.nome.isnot(None)
+        )
+        .where(
+            func.lower(Medicamentos.laboratorio).like(f"%{laboratorio.lower()}%")
+            if laboratorio is not None
+            else Medicamentos.laboratorio.isnot(None)
+        )
+    )
+    result = session.scalars(query).all()
 
     if result:
         print("Medicamentos encontrados:")
@@ -31,7 +37,6 @@ def busca_medicamento(
         print("Quantidade:", row.quantidade)
         print("Validade:", row.validade)
 
-    return result.all()
 
 
 def retirar_medicamento(session: Session, medicamento_id: int, quantidade: int):

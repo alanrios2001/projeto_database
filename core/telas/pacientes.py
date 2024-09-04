@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from core.models.db import (
@@ -37,7 +37,9 @@ def registrar_paciente(
 
 
 def consultar_paciente(session: Session, nome: str):
-    query = select(Pacientes).where(Pacientes.nome.like(f'%{nome}%'))
+    query = select(Pacientes).where(
+        func.lower(Pacientes.nome).like(f"%{nome.lower()}%")
+    )
     result = (session.scalars(query)).all()
 
     # print(query)

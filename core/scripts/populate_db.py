@@ -243,7 +243,7 @@ def create_pacientes(session: Session, num: int):
         paciente = Pacientes(
             nome=get_nome(genero),
             data_nascimento=fake.date_of_birth(minimum_age=18, maximum_age=90).strftime(
-                "%Y-%m-%d %H:%M:%S"
+                "%Y-%m-%d"
             ),
             genero=genero,
             endereco=fake.address(),
@@ -451,8 +451,8 @@ def create_medicamentos(session: Session, num: int):
         medicamento = Medicamentos(
             nome=nome,
             laboratorio=laboratorio,
-            validade=fake.future_date(end_date="+2y"),
-            quantidade=randint(10, 500),
+            validade=fake.future_date(end_date="+2y").strftime("%Y-%m-%d"),
+            quantidade=randint(10, 100),
         )
         medicamentos.append(medicamento)
 
