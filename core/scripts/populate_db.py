@@ -3,9 +3,22 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.models.db import (
-    LocalSessionDuckDB, Pacientes, Medicos, Consultas, TransacoesFinanceiras, Prontuarios,
-    Diagnosticos, Prescricoes, Medicamentos, RecursosHospitalares,
-    TipoConsultaEnum, EspecialidadeEnum, GeneroEnum, StatusEnum, TipoTransacaoEnum, LocalSession
+    LocalSessionDuckDB,
+    Pacientes,
+    Medicos,
+    Consultas,
+    TransacoesFinanceiras,
+    Prontuarios,
+    Diagnosticos,
+    Prescricoes,
+    Medicamentos,
+    RecursosHospitalares,
+    TipoConsultaEnum,
+    EspecialidadeEnum,
+    GeneroEnum,
+    StatusEnum,
+    TipoTransacaoEnum,
+    LocalSession,
 )
 from random import choice, randint
 
@@ -71,7 +84,7 @@ EQUIPAMENTOS_RECURSOS = [
     ("Compressor de Ar", "Schulz"),
     ("Compressor de Ar", "Medic Air"),
     ("Iluminador Cirúrgico", "Dräger"),
-    ("Iluminador Cirúrgico", "Philips")
+    ("Iluminador Cirúrgico", "Philips"),
 ]
 
 MEDICAMENTOS_LABORATORIOS = [
@@ -104,25 +117,34 @@ MEDICAMENTOS_LABORATORIOS = [
     ("Diclofenaco", "EMS"),
     ("Prednisona", "Sanofi"),
     ("Levotiroxina", "Merck"),
-    ("Fluconazol", "Teva")
+    ("Fluconazol", "Teva"),
 ]
 
-fake = Faker('pt_BR')
+fake = Faker("pt_BR")
 
 
 def get_nome(genero: GeneroEnum) -> str:
     if genero == GeneroEnum.MASCULINO:
-        return fake.first_name_male() + ' ' + fake.last_name()
+        return fake.first_name_male() + " " + fake.last_name()
     else:
-        return fake.first_name_female() + ' ' + fake.last_name()
+        return fake.first_name_female() + " " + fake.last_name()
 
 
 def generate_diagnostico_text():
     sintomas = [
-        "dor abdominal", "febre alta", "tosse persistente",
-        "cansaço extremo", "inchaço nas pernas", "dor de cabeça intensa",
-        "perda de apetite", "dor no peito", "tontura", "náuseas",
-        "dificuldade para respirar", "coceira na pele", "manchas avermelhadas"
+        "dor abdominal",
+        "febre alta",
+        "tosse persistente",
+        "cansaço extremo",
+        "inchaço nas pernas",
+        "dor de cabeça intensa",
+        "perda de apetite",
+        "dor no peito",
+        "tontura",
+        "náuseas",
+        "dificuldade para respirar",
+        "coceira na pele",
+        "manchas avermelhadas",
     ]
 
     conclusao = [
@@ -131,7 +153,7 @@ def generate_diagnostico_text():
         "Sintomas indicam possível quadro de hipertensão. Sugerida consulta com cardiologista.",
         "Alergia a substância não identificada. Indicado uso de anti-histamínico.",
         "Quadro compatível com sinusite. Prescrito tratamento com descongestionante nasal.",
-        "Paciente apresenta sinais de bronquite. Iniciado tratamento com broncodilatador."
+        "Paciente apresenta sinais de bronquite. Iniciado tratamento com broncodilatador.",
     ]
 
     diagnostico = (
@@ -145,10 +167,17 @@ def generate_diagnostico_text():
 
 def generate_prescricao_text():
     medicamentos = [
-        "Paracetamol 500mg", "Amoxicilina 875mg", "Ibuprofeno 400mg",
-        "Omeprazol 20mg", "Captopril 25mg", "Lorazepam 2mg",
-        "Metformina 850mg", "Atenolol 50mg", "Diclofenaco 50mg",
-        "Prednisona 20mg", "Simvastatina 40mg"
+        "Paracetamol 500mg",
+        "Amoxicilina 875mg",
+        "Ibuprofeno 400mg",
+        "Omeprazol 20mg",
+        "Captopril 25mg",
+        "Lorazepam 2mg",
+        "Metformina 850mg",
+        "Atenolol 50mg",
+        "Diclofenaco 50mg",
+        "Prednisona 20mg",
+        "Simvastatina 40mg",
     ]
 
     instrucoes = [
@@ -160,7 +189,7 @@ def generate_prescricao_text():
         "Tomar 1 comprimido após as refeições, por 15 dias.",
         "Aplicar na área afetada 3 vezes ao dia.",
         "Administrar 2 gotas a cada 4 horas, conforme necessário.",
-        "Usar 1 injeção subcutânea diariamente, por 7 dias."
+        "Usar 1 injeção subcutânea diariamente, por 7 dias.",
     ]
 
     prescricao = (
@@ -182,7 +211,7 @@ def generate_prontuario_observacao():
         "Paciente apresenta leve dificuldade respiratória.",
         "Condição clínica deteriorada nas últimas 12 horas.",
         "Paciente relata aumento de apetite e disposição.",
-        "Mantida a prescrição inicial. Monitoramento contínuo necessário."
+        "Mantida a prescrição inicial. Monitoramento contínuo necessário.",
     ]
 
     recomendacoes = [
@@ -195,7 +224,7 @@ def generate_prontuario_observacao():
         "Agendada revisão em uma semana.",
         "Revisão de medicação agendada para amanhã.",
         "Paciente orientado sobre sinais de alerta e retorno imediato se necessário.",
-        "Sugerida alta hospitalar caso mantenha evolução positiva."
+        "Sugerida alta hospitalar caso mantenha evolução positiva.",
     ]
 
     observacao = (
@@ -213,7 +242,9 @@ def create_pacientes(session: Session, num: int):
         genero = choice(list(GeneroEnum))
         paciente = Pacientes(
             nome=get_nome(genero),
-            data_nascimento=fake.date_of_birth(minimum_age=18, maximum_age=90).strftime('%Y-%m-%d %H:%M:%S'),
+            data_nascimento=fake.date_of_birth(minimum_age=18, maximum_age=90).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
             genero=genero,
             endereco=fake.address(),
             telefone=fake.phone_number(),
@@ -227,14 +258,14 @@ def create_pacientes(session: Session, num: int):
             f"'{paciente.genero.value}'",
             f"'{paciente.endereco}'",
             f"'{paciente.telefone}'",
-            f"'{paciente.email}'"
+            f"'{paciente.email}'",
         )
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO pacientes (nome, data_nascimento, genero, endereco, telefone, email) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO pacientes (nome, data_nascimento, genero, endereco, telefone, email) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(pacientes)
@@ -249,7 +280,7 @@ def create_medicos(session: Session, num: int):
         medico = Medicos(
             nome=get_nome(genero),
             genero=genero,
-            crm=fake.bothify(text='CRM-####-UF'),
+            crm=fake.bothify(text="CRM-####-UF"),
             especialidade=choice(list(EspecialidadeEnum)),
         )
         medicos.append(medico)
@@ -258,14 +289,14 @@ def create_medicos(session: Session, num: int):
             f"'{medico.nome}'",
             f"'{medico.genero.value}'",
             f"'{medico.crm}'",
-            f"'{medico.especialidade.value}'"
+            f"'{medico.especialidade.value}'",
         )
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO profissionais_saude (nome, genero, crm, especialidade) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO profissionais_saude (nome, genero, crm, especialidade) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(medicos)
@@ -282,7 +313,7 @@ def create_consultas(session: Session, num: int):
         consulta = Consultas(
             paciente_id=choice(pacientes_ids),
             profissional_id=choice(medicos_ids),
-            data=fake.date_time_between(start_date='-1y', end_date='now'),
+            data=fake.date_time_between(start_date="-1y", end_date="now"),
             tipo_consulta=choice(list(TipoConsultaEnum)).value,
         )
         consultas.append(consulta)
@@ -291,14 +322,14 @@ def create_consultas(session: Session, num: int):
             f"'{consulta.paciente_id}'",
             f"'{consulta.profissional_id}'",
             f"'{consulta.data}'",
-            f"'{consulta.tipo_consulta}'"
+            f"'{consulta.tipo_consulta}'",
         )
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO consultas (paciente_id, profissional_id, data, tipo_consulta) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO consultas (paciente_id, profissional_id, data, tipo_consulta) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(consultas)
@@ -315,7 +346,7 @@ def create_transacoes_financeiras(session: Session, num: int):
             paciente_id=choice(pacientes_ids),
             tipo_transacao=choice(list(TipoTransacaoEnum)),
             valor=str(randint(100, 10000)),
-            data=fake.date_time_between(start_date='-2y', end_date='now'),
+            data=fake.date_time_between(start_date="-2y", end_date="now"),
         )
         transacoes.append(transacao)
 
@@ -323,14 +354,14 @@ def create_transacoes_financeiras(session: Session, num: int):
             f"'{transacao.paciente_id}'",
             f"'{transacao.tipo_transacao.value}'",
             f"'{transacao.valor}'",
-            f"'{transacao.data}'"
+            f"'{transacao.data}'",
         )
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO transacoes_financeiras (paciente_id, tipo_transacao, valor, data) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO transacoes_financeiras (paciente_id, tipo_transacao, valor, data) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(transacoes)
@@ -349,16 +380,13 @@ def create_prontuarios(session: Session, num: int):
         )
         prontuarios.append(prontuario)
 
-        values = (
-            f"'{prontuario.paciente_id}'",
-            f"'{prontuario.observacoes}'"
-        )
+        values = (f"'{prontuario.paciente_id}'", f"'{prontuario.observacoes}'")
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO prontuarios (paciente_id, observacoes) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO prontuarios (paciente_id, observacoes) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(prontuarios)
@@ -377,16 +405,13 @@ def create_diagnosticos(session: Session, num: int):
         )
         diagnosticos.append(diagnostico)
 
-        values = (
-            f"'{diagnostico.consulta_id}'",
-            f"'{diagnostico.conteudo}'"
-        )
+        values = (f"'{diagnostico.consulta_id}'", f"'{diagnostico.conteudo}'")
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO diagnosticos (consulta_id, conteudo) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO diagnosticos (consulta_id, conteudo) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(diagnosticos)
@@ -405,16 +430,13 @@ def create_prescricoes(session: Session, num: int):
         )
         prescricoes.append(prescricao)
 
-        values = (
-            f"'{prescricao.consulta_id}'",
-            f"'{prescricao.conteudo}'"
-        )
+        values = (f"'{prescricao.consulta_id}'", f"'{prescricao.conteudo}'")
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO prescricoes (consulta_id, conteudo) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO prescricoes (consulta_id, conteudo) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(prescricoes)
@@ -429,7 +451,7 @@ def create_medicamentos(session: Session, num: int):
         medicamento = Medicamentos(
             nome=nome,
             laboratorio=laboratorio,
-            validade=fake.future_date(end_date='+2y'),
+            validade=fake.future_date(end_date="+2y"),
             quantidade=randint(10, 500),
         )
         medicamentos.append(medicamento)
@@ -438,14 +460,14 @@ def create_medicamentos(session: Session, num: int):
             f"'{medicamento.nome}'",
             f"'{medicamento.laboratorio}'",
             f"'{medicamento.validade}'",
-            f"'{medicamento.quantidade}'"
+            f"'{medicamento.quantidade}'",
         )
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO medicamentos (nome, laboratorio, validade, quantidade) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO medicamentos (nome, laboratorio, validade, quantidade) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(medicamentos)
@@ -467,14 +489,14 @@ def create_recursos_hospitalares(session: Session, num: int):
         values = (
             f"'{recurso.nome}'",
             f"'{recurso.marca}'",
-            f"'{recurso.status.value}'"
+            f"'{recurso.status.value}'",
         )
         values_list.append(f"({', '.join(values)})")
 
     sql_query = (
-                        "INSERT INTO recursos_hospitalares (nome, marca, status) "
-                        "VALUES\n" + ",\n".join(values_list) + ";"
-                ) + "\n"
+        "INSERT INTO recursos_hospitalares (nome, marca, status) "
+        "VALUES\n" + ",\n".join(values_list) + ";"
+    ) + "\n"
 
     print(sql_query)
     session.add_all(recursos)
@@ -495,13 +517,15 @@ def populate_all(session: Session, n: int = 15) -> None:
 
 if __name__ == "__main__":
 
-    sgbd = ''
-    while sgbd not in ['mysql', 'duckdb']:
-        sgbd = input('Digite o SGBD que deseja utilizar ("mysql" ou "duckdb"): ').lower()
+    sgbd = ""
+    while sgbd not in ["mysql", "duckdb"]:
+        sgbd = input(
+            'Digite o SGBD que deseja utilizar ("mysql" ou "duckdb"): '
+        ).lower()
 
-    if sgbd == 'mysql':
+    if sgbd == "mysql":
         with LocalSession() as session:
             populate_all(session, 50)
-    elif sgbd == 'duckdb':
+    elif sgbd == "duckdb":
         with LocalSessionDuckDB() as session:
             populate_all(session, 50)

@@ -4,18 +4,22 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.models.db import (
-    LocalAsyncSession, Pacientes, GeneroEnum, LocalSession, LocalSessionDuckDB
+    LocalAsyncSession,
+    Pacientes,
+    GeneroEnum,
+    LocalSession,
+    LocalSessionDuckDB,
 )
 
 
 def registrar_paciente(
-        session: Session,
-        nome: str,
-        data_nascimento: str,
-        genero: GeneroEnum,
-        endereco: str = None,
-        telefone: str = None,
-        email: str = None
+    session: Session,
+    nome: str,
+    data_nascimento: str,
+    genero: GeneroEnum,
+    endereco: str = None,
+    telefone: str = None,
+    email: str = None,
 ):
     paciente = Pacientes(
         nome=nome,
@@ -23,7 +27,7 @@ def registrar_paciente(
         genero=genero,
         endereco=endereco,
         telefone=telefone,
-        email=email
+        email=email,
     )
 
     session.add(paciente)
@@ -38,43 +42,43 @@ def consultar_paciente(session: Session, nome: str):
 
     # print(query)
     if not result:
-        print('Paciente não encontrado.')
+        print("Paciente não encontrado.")
         return None
-    print('Paciente encontrado:')
-    print('-----------------------------------')
+    print("Paciente encontrado:")
+    print("-----------------------------------")
     for r in result:
-        print('ID:', r.id)
-        print('Nome:', r.nome)
-        print('Data de Nascimento:', r.data_nascimento)
-        print('Gênero:', r.genero)
-        print('Endereço:', r.endereco)
-        print('Telefone:', r.telefone)
-        print('Email:', r.email)
+        print("ID:", r.id)
+        print("Nome:", r.nome)
+        print("Data de Nascimento:", r.data_nascimento)
+        print("Gênero:", r.genero)
+        print("Endereço:", r.endereco)
+        print("Telefone:", r.telefone)
+        print("Email:", r.email)
     return result
 
 
 def interface(session: Session):
     while True:
-        print('Selecione uma opção:')
-        print('1 - Registrar paciente')
-        print('2 - Consultar paciente')
-        print('q - Sair')
-        opcao = input('Opção: ')
+        print("Selecione uma opção:")
+        print("1 - Registrar paciente")
+        print("2 - Consultar paciente")
+        print("q - Sair")
+        opcao = input("Opção: ")
 
-        if opcao == '1':
-            nome = input('Nome: ')
-            data_nascimento = input('Data de nascimento: ')
-            genero = input('Gênero(MASCULINO, FEMININO): ')
-            endereco = input('Endereço: ')
-            telefone = input('Telefone: ')
-            email = input('Email: ')
+        if opcao == "1":
+            nome = input("Nome: ")
+            data_nascimento = input("Data de nascimento: ")
+            genero = input("Gênero(MASCULINO, FEMININO): ")
+            endereco = input("Endereço: ")
+            telefone = input("Telefone: ")
+            email = input("Email: ")
 
             # verifica se o genero é válido, se não for, pede para digitar novamente somente o genero
-            while genero not in ['MASCULINO', 'FEMININO', 'masculino', 'feminino']:
-                genero = input('Gênero(MASCULINO, FEMININO): ')
+            while genero not in ["MASCULINO", "FEMININO", "masculino", "feminino"]:
+                genero = input("Gênero(MASCULINO, FEMININO): ")
 
-            #formata a data de nascimento para datetime
-            data_nascimento = datetime.strptime(data_nascimento, '%d/%m/%Y')
+            # formata a data de nascimento para datetime
+            data_nascimento = datetime.strptime(data_nascimento, "%d/%m/%Y")
 
             registrar_paciente(
                 session,
@@ -83,24 +87,24 @@ def interface(session: Session):
                 genero=GeneroEnum[genero.upper()],
                 endereco=endereco,
                 telefone=telefone,
-                email=email
+                email=email,
             )
-        elif opcao == '2':
-            nome = input('Nome: ')
+        elif opcao == "2":
+            nome = input("Nome: ")
             consultar_paciente(session, nome=nome)
-        elif opcao == 'q':
+        elif opcao == "q":
             break
         else:
-            print('Opção inválida.')
+            print("Opção inválida.")
 
 
-if __name__ == '__main__':
-    sgbd = ''
-    while sgbd not in ['mysql', 'duckdb']:
-        sgbd = input('Digite o SGBD para criar o banco e as tabelas(mysql ou duckdb): ')
-    if sgbd == 'mysql':
+if __name__ == "__main__":
+    sgbd = ""
+    while sgbd not in ["mysql", "duckdb"]:
+        sgbd = input("Digite o SGBD para criar o banco e as tabelas(mysql ou duckdb): ")
+    if sgbd == "mysql":
         with LocalSession() as session:
             interface(session)
-    else:
+    elif sgbd == "duckdb":
         with LocalSessionDuckDB() as session:
             interface(session)
