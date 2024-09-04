@@ -22,17 +22,14 @@ Criar database e tabelas:
 ```bash
 poetry run python core/models/db.py
 ```
+Após executar o código, selecione o sgbd que você deseja utilizar para criar as tabelas.
 
-Caso queira utilizar o duck_db como sgbd, alterar por código o argumento passado na função create_database na linha 248 do arquivo db.py, para 'duckdb'.
-```python
-if __name__ == "__main__":
-    create_database('duckdb')
-```
 
 Para popular as tabelas do banco de dados:
 ```bash
 poetry run python core\scripts\populate_db.py
 ```
+Após executar o código, selecione o sgbd que você deseja utilizar para popular as tabelas.
 
 
 Existem algumas telas com backend implementado. para executa-los, basta utilizar o seguinte comando no cmd:
