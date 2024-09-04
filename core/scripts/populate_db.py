@@ -518,14 +518,23 @@ def populate_all(session: Session, n: int = 15) -> None:
 if __name__ == "__main__":
 
     sgbd = ""
-    while sgbd not in ["mysql", "duckdb"]:
+    while sgbd not in ["mysql", "duckdb", "q"]:
         sgbd = input(
             'Digite o SGBD que deseja utilizar ("mysql" ou "duckdb"): '
         ).lower()
 
+    quantidade = 0
+    while type(quantidade) != int or quantidade <= 0:
+        try:
+            quantidade = int(
+                input("Digite a quantidade de registros a serem criados por tabela: ")
+            )
+        except ValueError:
+            print("Digite um número inteiro válido.")
+
     if sgbd == "mysql":
         with LocalSession() as session:
-            populate_all(session, 50)
+            populate_all(session, quantidade)
     elif sgbd == "duckdb":
         with LocalSessionDuckDB() as session:
-            populate_all(session, 50)
+            populate_all(session, quantidade)

@@ -37,7 +37,7 @@ def registrar_paciente(
 
 
 def consultar_paciente(session: Session, nome: str):
-    query = select(Pacientes).where(Pacientes.nome.like(nome))
+    query = select(Pacientes).where(Pacientes.nome.like(f'%{nome}%'))
     result = (session.scalars(query)).all()
 
     # print(query)
